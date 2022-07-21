@@ -2,7 +2,7 @@ use quadtree::{rect::Rect, QuadNode, QuadTree};
 use wgpu::util::DeviceExt;
 
 use crate::{
-    vertex::{Position, Vertex, INDICES},
+    vertex::{Position, Vertex},
     wgpu_holder::WGPUHolder,
 };
 
@@ -21,7 +21,9 @@ impl QuadTreeRenderer {
                     Self::render_node(&child.1, focus, holder, output);
                 }
             }
-            &QuadNode::Leaf { aabb, .. } => {
+            &QuadNode::Leaf {
+                aabb, ref elements, ..
+            } => {
                 if aabb.intersects(&focus) {
                     let vertex = Vertex::get_position(&aabb, focus);
                     let indices: &[u16] = &[0, 1, 3, 2, 0];

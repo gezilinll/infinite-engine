@@ -87,6 +87,7 @@ impl Canvas {
         for element in &self.elements {
             quad_tree.insert(element.1.copy_for_quadtree());
         }
+        quad_tree.print_info();
 
         let output = self.holder.surface.get_current_texture().unwrap();
         let view = output

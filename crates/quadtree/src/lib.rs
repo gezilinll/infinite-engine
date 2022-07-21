@@ -75,9 +75,35 @@ impl<T> QuadTree<T> {
         T: Spatial,
     {
         let aabb = t.aabb();
-        self.insert_with_box(t, aabb)
+        let result = self.insert_with_box(t, aabb);
+        result
     }
 
+    pub fn print_info(&self) {
+        Self::print_node(&self.root);
+    }
+
+    pub fn print_node(node: &QuadNode) {
+        match node {
+            &QuadNode::Branch {
+                aabb, ref children, ..
+            } => {
+                println!(
+                    "[---BRANCH---] {}-{}-{}-{}",
+                    aabb.left, aabb.right, aabb.top, aabb.bottom
+                );
+                for child in children {
+                    Self::print_node(&child.1);
+                }
+            }
+            &QuadNode::Leaf { aabb, .. } => {
+                println!(
+                    "[-LEAF-] {}-{}-{}-{}",
+                    aabb.left, aabb.right, aabb.top, aabb.bottom
+                );
+            }
+        }
+    }
     pub fn query(&self, bounding_box: Rect) -> Vec<(&T, &Rect, ItemId)> {
         let mut ids = vec![];
         self.root.query(&bounding_box, &mut ids);
@@ -126,27 +152,26 @@ impl QuadNode {
                 ref joint_quad,
                 ..
             } => {
-                if item_aabb.contains(aabb.midpoint())
-                    || item_aabb.intersects(&joint_quad[0])
-                    || item_aabb.intersects(&joint_quad[1])
-                    || item_aabb.intersects(&joint_quad[2])
-                    || item_aabb.intersects(&joint_quad[3])
-                {
-                    elements.push((item_id, item_aabb));
-                    did_insert = true;
-                } else {
-                    for (child_aabb, child) in children {
-                        if child_aabb.intersects(&item_aabb) {
-                            if child.insert(item_id, item_aabb, config) {
-                                did_insert = true;
-                            }
-                            break;
+                // if item_aabb.contains(aabb.midpoint())
+                //     || item_aabb.intersects(&joint_quad[0])
+                //     || item_aabb.intersects(&joint_quad[1])
+                //     || item_aabb.intersects(&joint_quad[2])
+                //     || item_aabb.intersects(&joint_quad[3])
+                // {
+                //     elements.push((item_id, item_aabb));
+                //     did_insert = true;
+                // } else {
+                for (child_aabb, child) in children {
+                    if child_aabb.intersects(&item_aabb) {
+                        if child.insert(item_id, item_aabb, config) {
+                            did_insert = true;
                         }
                     }
                 }
-                if did_insert {
-                    *element_count += 1;
-                }
+                // }
+                // if did_insert {
+                //     *element_count += 1;
+                // }
             }
             &mut QuadNode::Leaf {
                 aabb,
@@ -197,6 +222,7 @@ impl QuadNode {
         }
 
         if let Some((extracted_children, new_node)) = into {
+            println!("lbh leaf to branch");
             *self = new_node;
             for (child_id, child_aabb) in extracted_children {
                 self.insert(child_id, child_aabb, config);
