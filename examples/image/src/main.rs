@@ -7,6 +7,10 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
 };
 
+fn add_test_element() {
+    
+}
+
 fn main() {
     let current_dir = env::current_dir().unwrap().to_str().unwrap().to_string();
     let image_path = if current_dir.contains("examples") {
