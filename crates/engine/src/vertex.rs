@@ -2,6 +2,27 @@ use quadtree::rect::Rect;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable, Default)]
+pub struct Position {
+    position: [f32; 3],
+}
+
+impl Position {
+    pub fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
+        use std::mem;
+        wgpu::VertexBufferLayout {
+            array_stride: mem::size_of::<Position>() as wgpu::BufferAddress,
+            step_mode: wgpu::VertexStepMode::Vertex,
+            attributes: &[wgpu::VertexAttribute {
+                offset: 0,
+                shader_location: 0,
+                format: wgpu::VertexFormat::Float32x3,
+            }],
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable, Default)]
 pub struct Vertex {
     position: [f32; 3],
     tex_coords: [f32; 2],
@@ -26,6 +47,37 @@ impl Vertex {
                 },
             ],
         }
+    }
+
+    pub fn get_position(object: &Rect, canvas: &Rect) -> Vec<Position> {
+        let canvas_mid = (
+            (canvas.left + canvas.right) / 2.0,
+            (canvas.top + canvas.bottom) / 2.0,
+        );
+        let canvas_half = (
+            (canvas.right - canvas.left) / 2.0,
+            (canvas.top - canvas.bottom) / 2.0,
+        );
+
+        let v_left = ((object.left - canvas_mid.0) / canvas_half.0).max(-0.9);
+        let v_right = ((object.right - canvas_mid.0) / canvas_half.0).min(0.9);
+        let v_top = ((object.top - canvas_mid.1) / canvas_half.1).min(0.9);
+        let v_bottom = ((object.bottom - canvas_mid.1) / canvas_half.1).max(-0.9);
+
+        vec![
+            Position {
+                position: [v_left, v_bottom, 0.0],
+            }, // A
+            Position {
+                position: [v_right, v_bottom, 0.0],
+            }, // B
+            Position {
+                position: [v_left, v_top, 0.0],
+            }, // C
+            Position {
+                position: [v_right, v_top, 0.0],
+            },
+        ]
     }
 
     pub fn get_vertex(object: &Rect, canvas: &Rect, img_w: u32, img_h: u32) -> Vec<Vertex> {
@@ -54,7 +106,7 @@ impl Vertex {
             1.0
         };
         let t_top = if object.top > canvas.top {
-           (object.top - canvas.top) / img_h as f32
+            (object.top - canvas.top) / img_h as f32
         } else {
             0.0
         };

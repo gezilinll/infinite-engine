@@ -2,10 +2,12 @@ use std::collections::HashMap;
 
 use element::ImageElement;
 use quadtree::{rect::Rect, QuadTree, QuadTreeConfig};
+use render_quadtree::QuadTreeRenderer;
 use wgpu_holder::WGPUHolder;
 use winit::window::Window;
 
 pub mod element;
+mod render_quadtree;
 mod texture;
 mod vertex;
 mod wgpu_holder;
@@ -33,7 +35,7 @@ impl Canvas {
             .request_device(
                 &wgpu::DeviceDescriptor {
                     label: None,
-                    features: wgpu::Features::empty(),
+                    features: wgpu::Features::POLYGON_MODE_LINE,
                     // WebGL doesn't support all of wgpu's features, so if
                     // we're building for the web we'll have to disable some.
                     limits: if cfg!(target_arch = "wasm32") {
@@ -95,6 +97,9 @@ impl Canvas {
             let element = self.elements.get_mut(&element.get_id()).unwrap();
             element.submit(&focus, &mut self.holder, &view);
         }
+
+        QuadTreeRenderer::render(&quad_tree, &mut self.holder, &focus, &view);
+
         output.present();
     }
 }

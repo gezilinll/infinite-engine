@@ -20,7 +20,7 @@ pub struct QuadTreeConfig {
     pub max_depth: usize,
 }
 
-enum QuadNode {
+pub enum QuadNode {
     Branch {
         aabb: Rect,
         depth: usize,
@@ -38,7 +38,7 @@ enum QuadNode {
 
 pub struct QuadTree<T> {
     id: u32,
-    root: QuadNode,
+    pub root: QuadNode,
     config: QuadTreeConfig,
     elements: FnvHashMap<ItemId, (T, Rect)>,
 }

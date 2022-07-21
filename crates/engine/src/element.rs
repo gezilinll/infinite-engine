@@ -138,8 +138,8 @@ impl ImageElement {
                         targets: &[wgpu::ColorTargetState {
                             format: holder.config.format,
                             blend: Some(wgpu::BlendState {
-                                color: wgpu::BlendComponent::REPLACE,
-                                alpha: wgpu::BlendComponent::REPLACE,
+                                color: wgpu::BlendComponent::OVER,
+                                alpha: wgpu::BlendComponent::OVER,
                             }),
                             write_mask: wgpu::ColorWrites::ALL,
                         }],
@@ -174,12 +174,7 @@ impl ImageElement {
                     view: &output,
                     resolve_target: None,
                     ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: 0.1,
-                            g: 0.2,
-                            b: 0.3,
-                            a: 1.0,
-                        }),
+                        load: wgpu::LoadOp::Load,
                         store: true,
                     },
                 }],

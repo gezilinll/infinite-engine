@@ -68,13 +68,13 @@ fn main() {
                 _ => {}
             },
             Event::RedrawRequested(window_id) if window_id == window.id() => {
-                canvas.render(Rect::new(
-                    focus_rect.left - 300.,
-                    focus_rect.right - 300.,
-                    focus_rect.top - 300.,
-                    focus_rect.bottom - 300.,
-                ));
-                // canvas.render(focus_rect);
+                // canvas.render(Rect::new(
+                //     focus_rect.left - 300.,
+                //     focus_rect.right - 300.,
+                //     focus_rect.top - 300.,
+                //     focus_rect.bottom - 300.,
+                // ));
+                canvas.render(focus_rect);
             }
             _ => {}
         }
