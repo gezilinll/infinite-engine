@@ -19,6 +19,7 @@ pub struct Canvas {
     area: Rect,
     holder: WGPUHolder,
     texture_pool: TexturePool,
+    scale: f32,
 }
 
 impl Canvas {
@@ -72,11 +73,16 @@ impl Canvas {
                 config,
             },
             texture_pool: TexturePool::new(),
+            scale: 1.0,
         }
     }
 
     pub fn add_element(&mut self, element: ImageElement) {
         self.elements.insert(element.get_id(), element);
+    }
+
+    pub fn scale(&mut self, scale: f32) {
+        self.scale = scale;
     }
 
     pub fn render(&mut self, focus: Rect) {
@@ -90,7 +96,7 @@ impl Canvas {
             },
         );
         for element in &self.elements {
-            quad_tree.insert(element.1.copy_for_quadtree());
+            quad_tree.insert(element.1.copy_for_quadtree(self.scale));
         }
         // let mut log_file = File::create("/Users/linbinghe/Projects/Infinite-canvas/log.txt").unwrap();
         // write!(&mut log_file, "{:#?}", quad_tree).unwrap();
@@ -102,7 +108,13 @@ impl Canvas {
         let mut elements_to_render = quad_tree.query(focus);
         for (element, _, _) in &mut elements_to_render {
             let element = self.elements.get_mut(&element.get_id()).unwrap();
-            element.submit(&focus, &mut self.holder, &mut self.texture_pool, &view);
+            element.submit(
+                &focus,
+                self.scale,
+                &mut self.holder,
+                &mut self.texture_pool,
+                &view,
+            );
         }
 
         QuadTreeRenderer::render(&quad_tree, &mut self.holder, &focus, &view);

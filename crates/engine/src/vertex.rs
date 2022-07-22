@@ -96,22 +96,22 @@ impl Vertex {
         let v_bottom = ((object.bottom - canvas_mid.1) / canvas_half.1).max(-1.0);
 
         let t_left = if object.left < canvas.left {
-            (canvas.left - object.left) / img_w as f32
+            (canvas.left - object.left) / (object.right - object.left)
         } else {
             0.0
         };
         let t_right = if object.right > canvas.right {
-            1.0 - (object.right - canvas.right) / img_w as f32
+            1.0 - (object.right - canvas.right) / (object.right - object.left)
         } else {
             1.0
         };
         let t_top = if object.top > canvas.top {
-            (object.top - canvas.top) / img_h as f32
+            (object.top - canvas.top) / (object.top - object.bottom)
         } else {
             0.0
         };
         let t_bottom = if object.bottom < canvas.bottom {
-            1.0 - (canvas.bottom - object.bottom) / img_h as f32
+            1.0 - (canvas.bottom - object.bottom) / (object.top - object.bottom)
         } else {
             1.0
         };

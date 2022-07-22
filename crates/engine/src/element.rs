@@ -58,10 +58,17 @@ impl ImageElement {
     pub fn submit(
         &mut self,
         canvas_area: &Rect,
+        scale: f32,
         holder: &mut WGPUHolder,
         texture_pool: &mut TexturePool,
         output: &TextureView,
     ) {
+        let real_rect = Rect::new(
+            self.rect.left * scale,
+            self.rect.right * scale,
+            self.rect.top * scale,
+            self.rect.bottom * scale,
+        );
         let texture = texture_pool.get(
             &self.file_path,
             self.image.as_ref().unwrap().lock().as_ref().unwrap(),
@@ -76,7 +83,7 @@ impl ImageElement {
                     break &texture.view[current_level];
                 }
                 let next_width = current_width / 2;
-                if self.rect.right - self.rect.left >= next_width as f32 {
+                if real_rect.right - real_rect.left >= next_width as f32 {
                     break &texture.view[current_level];
                 }
                 current_width = next_width;
@@ -85,7 +92,7 @@ impl ImageElement {
         };
 
         let vertex = Vertex::get_vertex(
-            &self.rect,
+            &real_rect,
             canvas_area,
             self.image_size.0,
             self.image_size.1,
@@ -231,13 +238,18 @@ impl ImageElement {
         holder.queue.submit(std::iter::once(encoder.finish()));
     }
 
-    pub fn copy_for_quadtree(&self) -> ImageElement {
+    pub fn copy_for_quadtree(&self, scale: f32) -> ImageElement {
         ImageElement {
             id: self.id,
             image: None,
             image_size: (0, 0),
             file_path: "".to_string(),
-            rect: self.rect,
+            rect: Rect::new(
+                self.rect.left * scale,
+                self.rect.right * scale,
+                self.rect.top * scale,
+                self.rect.bottom * scale,
+            ),
         }
     }
 }
