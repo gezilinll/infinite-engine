@@ -3,7 +3,7 @@ use quadtree::rect::Rect;
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable, Default)]
 pub struct Position {
-    position: [f32; 3],
+    pub position: [f32; 3],
 }
 
 impl Position {
@@ -59,10 +59,10 @@ impl Vertex {
             (canvas.top - canvas.bottom) / 2.0,
         );
 
-        let v_left = ((object.left - canvas_mid.0) / canvas_half.0);
-        let v_right = ((object.right - canvas_mid.0) / canvas_half.0);
-        let v_top = ((object.top - canvas_mid.1) / canvas_half.1);
-        let v_bottom = ((object.bottom - canvas_mid.1) / canvas_half.1);
+        let v_left = (object.left - canvas_mid.0) / canvas_half.0;
+        let v_right = (object.right - canvas_mid.0) / canvas_half.0;
+        let v_top = (object.top - canvas_mid.1) / canvas_half.1;
+        let v_bottom = (object.bottom - canvas_mid.1) / canvas_half.1;
 
         vec![
             Position {
