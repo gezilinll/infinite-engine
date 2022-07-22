@@ -16,13 +16,13 @@ fn add_test_element(canvas: &mut Canvas, window_w: u32, window_h: u32) {
     };
 
     let item_width = 50;
-    let mut current_index = 0;
+    let mut current_index = 1;
     let mut element_id = 100 as u32;
     let origin_rect = Rect::new(0., 50., 0., -50.);
     let image_element = ImageElement::new(element_id, image_path.clone(), origin_rect);
     canvas.add_element(image_element);
     loop {
-        if current_index == 25 {
+        if current_index == 8 {
             break;
         }
         element_id += 1;
@@ -71,7 +71,12 @@ fn main() {
 
     let mut canvas = pollster::block_on(Canvas::new(
         &window,
-        Rect::new(-5000., 5000., 5000., -5000.),
+        Rect::new(
+            -(window_size.width as f32),
+            window_size.width as f32,
+            window_size.height as f32,
+            -(window_size.height as f32),
+        ),
     ));
     add_test_element(&mut canvas, window_size.width, window_size.height);
 
@@ -96,12 +101,6 @@ fn main() {
                 _ => {}
             },
             Event::RedrawRequested(window_id) if window_id == window.id() => {
-                // canvas.render(Rect::new(
-                //     focus_rect.left - 300.,
-                //     focus_rect.right - 300.,
-                //     focus_rect.top - 300.,
-                //     focus_rect.bottom - 300.,
-                // ));
                 let current = Instant::now();
                 canvas.render(focus_rect);
                 println!("render cost:{}", current.elapsed().subsec_millis());

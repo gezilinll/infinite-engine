@@ -1,4 +1,4 @@
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Rect {
     pub left: f32,
     pub right: f32,
@@ -17,15 +17,10 @@ impl Rect {
     }
 
     pub fn intersects(&self, other: &Rect) -> bool {
-        let result = self.left < other.right
+        self.left < other.right
             && self.right > other.left
             && self.bottom < other.top
-            && self.top > other.bottom;
-        result
-            || self.left == other.left
-            || self.right == other.right
-            || self.top == other.top
-            || self.bottom == other.bottom
+            && self.top > other.bottom
     }
 
     pub fn midpoint(&self) -> (f32, f32) {
@@ -42,7 +37,7 @@ impl Rect {
         );
         [
             Rect::new(self.left, self.left + half.0, self.top, self.top - half.1), // 左上
-            Rect::new(self.left + half.0, self.top, self.right, self.top - half.1), // 右上
+            Rect::new(self.left + half.0, self.right, self.top, self.top - half.1), // 右上
             Rect::new(
                 self.left,
                 self.left + half.0,

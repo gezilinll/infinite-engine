@@ -13,6 +13,16 @@ pub struct ImageElement {
     rect: Rect,
 }
 
+impl std::fmt::Debug for ImageElement {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("Branch")
+            .field("id", &self.id)
+            .field("rect", &self.rect)
+            .finish()
+    }
+}
+
 impl Spatial for ImageElement {
     fn aabb(&self) -> Rect {
         self.rect

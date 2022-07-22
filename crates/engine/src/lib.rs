@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fs::File, io::Write};
 
 use element::ImageElement;
 use quadtree::{rect::Rect, QuadTree, QuadTreeConfig};
@@ -87,7 +87,8 @@ impl Canvas {
         for element in &self.elements {
             quad_tree.insert(element.1.copy_for_quadtree());
         }
-        quad_tree.print_info();
+        // let mut log_file = File::create("/Users/linbinghe/Projects/Infinite-canvas/log.txt").unwrap();
+        // write!(&mut log_file, "{:#?}", quad_tree).unwrap();
 
         let output = self.holder.surface.get_current_texture().unwrap();
         let view = output
