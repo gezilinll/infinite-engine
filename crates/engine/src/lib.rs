@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs::File, io::Write};
+use std::{collections::HashMap, fs::File, io::Write, time::Instant};
 
 use element::ImageElement;
 use quadtree::{rect::Rect, QuadTree, QuadTreeConfig};
@@ -80,6 +80,7 @@ impl Canvas {
     }
 
     pub fn render(&mut self, focus: Rect) {
+        let current = Instant::now();
         let mut quad_tree = QuadTree::<ImageElement>::new(
             self.area,
             QuadTreeConfig {
@@ -107,5 +108,11 @@ impl Canvas {
         QuadTreeRenderer::render(&quad_tree, &mut self.holder, &focus, &view);
 
         output.present();
+
+        println!(
+            "render size:{} cost:{}",
+            elements_to_render.len(),
+            current.elapsed().subsec_millis()
+        );
     }
 }

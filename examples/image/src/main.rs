@@ -34,7 +34,7 @@ fn add_test_element(
             let mut exist_id: HashMap<u32, u32> = HashMap::new();
             exist_id.insert(image_index, 1);
             let item_width = 160;
-            let max_elements = 188;
+            let max_elements = 166;
             let mut element_count = 1;
             let mut element_id = 100;
             loop {
@@ -156,9 +156,7 @@ fn main() {
                 _ => {}
             },
             Event::RedrawRequested(window_id) if window_id == window.id() => {
-                let current = Instant::now();
                 canvas.lock().unwrap().render(focus_rect);
-                println!("render cost:{}", current.elapsed().subsec_millis());
             }
             _ => {}
         }

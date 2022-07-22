@@ -80,6 +80,8 @@ impl<T> QuadTree<T> {
     pub fn query(&self, bounding_box: Rect) -> Vec<(&T, &Rect, ItemId)> {
         let mut ids = vec![];
         self.root.query(&bounding_box, &mut ids);
+        ids.sort_by_key(|&(id, _)| id);
+        ids.dedup();
         ids.iter()
             .map(|&(id, _)| {
                 let &(ref t, ref rect) = match self.elements.get(&id) {
@@ -229,6 +231,8 @@ impl QuadNode {
         if let Some((size, aabb, depth)) = compact {
             let mut elements: Vec<(ItemId, Rect)> = Vec::with_capacity(size);
             self.query(aabb, &mut elements);
+            elements.sort_by(|&(id1, _), &(ref id2, _)| id1.cmp(id2));
+            elements.dedup();
             *self = QuadNode::Leaf {
                 aabb: aabb.clone(),
                 depth,

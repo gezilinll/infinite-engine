@@ -69,3 +69,12 @@ impl Rect {
             && self.bottom <= point.1
     }
 }
+
+impl PartialEq for Rect {
+    fn eq(&self, other: &Self) -> bool {
+        self.left == other.left
+            && self.right == other.right
+            && self.top == other.top
+            && self.bottom == other.bottom
+    }
+}
