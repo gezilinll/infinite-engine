@@ -3,12 +3,14 @@ use std::{collections::HashMap, fs::File, io::Write};
 use element::ImageElement;
 use quadtree::{rect::Rect, QuadTree, QuadTreeConfig};
 use render_quadtree::QuadTreeRenderer;
+use texture_pool::TexturePool;
 use wgpu_holder::WGPUHolder;
 use winit::window::Window;
 
 pub mod element;
 mod render_quadtree;
 mod texture;
+mod texture_pool;
 mod vertex;
 mod wgpu_holder;
 
@@ -16,6 +18,7 @@ pub struct Canvas {
     elements: HashMap<u32, ImageElement>,
     area: Rect,
     holder: WGPUHolder,
+    texture_pool: TexturePool,
 }
 
 impl Canvas {
@@ -68,6 +71,7 @@ impl Canvas {
                 queue,
                 config,
             },
+            texture_pool: TexturePool::new(),
         }
     }
 
@@ -79,8 +83,8 @@ impl Canvas {
         let mut quad_tree = QuadTree::<ImageElement>::new(
             self.area,
             QuadTreeConfig {
-                max_children: 2,
-                min_children: 1,
+                max_children: 5,
+                min_children: 2,
                 max_depth: 8,
             },
         );
@@ -97,7 +101,7 @@ impl Canvas {
         let mut elements_to_render = quad_tree.query(focus);
         for (element, _, _) in &mut elements_to_render {
             let element = self.elements.get_mut(&element.get_id()).unwrap();
-            element.submit(&focus, &mut self.holder, &view);
+            element.submit(&focus, &mut self.holder, &mut self.texture_pool, &view);
         }
 
         QuadTreeRenderer::render(&quad_tree, &mut self.holder, &focus, &view);

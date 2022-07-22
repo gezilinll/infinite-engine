@@ -1,15 +1,20 @@
+use std::sync::{Arc, Mutex};
+
 use crate::{
     texture::{from_image, Texture},
+    texture_pool::TexturePool,
     vertex::{Vertex, INDICES},
     wgpu_holder::WGPUHolder,
 };
+use image::DynamicImage;
 use quadtree::{rect::Rect, Spatial};
 use wgpu::{util::DeviceExt, TextureView};
 
 pub struct ImageElement {
     id: u32,
-    texture: Option<Texture>,
     file_path: String,
+    image: Option<Arc<Mutex<DynamicImage>>>,
+    image_size: (u32, u32),
     rect: Rect,
 }
 
@@ -30,12 +35,19 @@ impl Spatial for ImageElement {
 }
 
 impl ImageElement {
-    pub fn new(id: u32, file_path: String, rect: Rect) -> ImageElement {
+    pub fn new(
+        id: u32,
+        file_path: String,
+        image: Arc<Mutex<DynamicImage>>,
+        image_size: (u32, u32),
+        rect: Rect,
+    ) -> ImageElement {
         ImageElement {
             id,
             file_path,
+            image: Some(image),
+            image_size,
             rect,
-            texture: None,
         }
     }
 
@@ -43,17 +55,40 @@ impl ImageElement {
         self.id
     }
 
-    pub fn submit(&mut self, canvas_area: &Rect, holder: &mut WGPUHolder, output: &TextureView) {
-        if self.texture.is_none() {
-            let image = image::open(self.file_path.clone()).unwrap();
-            self.texture = Some(from_image(holder, &image, None));
-        }
+    pub fn submit(
+        &mut self,
+        canvas_area: &Rect,
+        holder: &mut WGPUHolder,
+        texture_pool: &mut TexturePool,
+        output: &TextureView,
+    ) {
+        let texture = texture_pool.get(
+            &self.file_path,
+            self.image.as_ref().unwrap().lock().as_ref().unwrap(),
+            holder,
+        );
+        let texture_view = {
+            let level_count = texture.view.len();
+            let mut current_level = 0;
+            let mut current_width = self.image_size.0;
+            loop {
+                if current_level == level_count - 1 {
+                    break &texture.view[current_level];
+                }
+                let next_width = current_width / 2;
+                if self.rect.right - self.rect.left >= next_width as f32 {
+                    break &texture.view[current_level];
+                }
+                current_width = next_width;
+                current_level += 1;
+            }
+        };
 
         let vertex = Vertex::get_vertex(
             &self.rect,
             canvas_area,
-            self.texture.as_ref().unwrap().width,
-            self.texture.as_ref().unwrap().height,
+            self.image_size.0,
+            self.image_size.1,
         );
 
         let mut encoder = holder
@@ -105,15 +140,11 @@ impl ImageElement {
             entries: &[
                 wgpu::BindGroupEntry {
                     binding: 0,
-                    resource: wgpu::BindingResource::TextureView(
-                        &self.texture.as_ref().unwrap().view,
-                    ),
+                    resource: wgpu::BindingResource::TextureView(texture_view),
                 },
                 wgpu::BindGroupEntry {
                     binding: 1,
-                    resource: wgpu::BindingResource::Sampler(
-                        &self.texture.as_ref().unwrap().sampler,
-                    ),
+                    resource: wgpu::BindingResource::Sampler(&texture.sampler),
                 },
             ],
             label: Some("diffuse_bind_group"),
@@ -203,7 +234,8 @@ impl ImageElement {
     pub fn copy_for_quadtree(&self) -> ImageElement {
         ImageElement {
             id: self.id,
-            texture: None,
+            image: None,
+            image_size: (0, 0),
             file_path: "".to_string(),
             rect: self.rect,
         }

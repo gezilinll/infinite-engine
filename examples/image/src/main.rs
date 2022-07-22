@@ -1,56 +1,79 @@
-use std::{env, time::Instant};
+mod image_pool;
+
+use std::{
+    collections::HashMap,
+    env,
+    sync::{Arc, Mutex},
+    thread,
+    time::Instant,
+};
 
 use engine::{element::ImageElement, Canvas};
+use image_pool::ImagePool;
 use quadtree::rect::Rect;
+use rand::Rng;
 use winit::{
     event::{ElementState, Event, KeyboardInput, VirtualKeyCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
 };
 
-fn add_test_element(canvas: &mut Canvas, window_w: u32, window_h: u32) {
+fn add_test_element(
+    canvas: Arc<Mutex<Canvas>>,
+    image_pool: Arc<Mutex<ImagePool>>,
+    image_index: u32,
+) {
     let current_dir = env::current_dir().unwrap().to_str().unwrap().to_string();
-    let image_path = if current_dir.contains("examples") {
-        env::current_dir().unwrap().to_str().unwrap().to_string() + "/1.jpg"
+    let image_dir = if current_dir.contains("examples") {
+        env::current_dir().unwrap().to_str().unwrap().to_string() + "/"
     } else {
-        env::current_dir().unwrap().to_str().unwrap().to_string() + "/examples/image/2.jpg"
+        env::current_dir().unwrap().to_str().unwrap().to_string() + "/examples/image/"
     };
-
-    let item_width = 50;
-    let mut current_index = 1;
-    let mut element_id = 100 as u32;
-    let origin_rect = Rect::new(0., 50., 0., -50.);
-    let image_element = ImageElement::new(element_id, image_path.clone(), origin_rect);
-    canvas.add_element(image_element);
-    loop {
-        if current_index == 8 {
-            break;
-        }
-        element_id += 1;
-        let image_element = ImageElement::new(
-            element_id,
-            image_path.clone(),
-            Rect::new(
-                origin_rect.left,
-                origin_rect.right,
-                origin_rect.top + (current_index * item_width) as f32,
-                origin_rect.bottom + (current_index * item_width) as f32,
-            ),
-        );
-        canvas.add_element(image_element);
-        element_id += 1;
-        let image_element = ImageElement::new(
-            element_id,
-            image_path.clone(),
-            Rect::new(
-                origin_rect.left,
-                origin_rect.right,
-                origin_rect.top - (current_index * item_width) as f32,
-                origin_rect.bottom - (current_index * item_width) as f32,
-            ),
-        );
-        canvas.add_element(image_element);
-        current_index += 1;
-    }
+    thread::Builder::new()
+        .name("add_test_element".to_string())
+        .spawn(move || {
+            let mut exist_id: HashMap<u32, u32> = HashMap::new();
+            exist_id.insert(image_index, 1);
+            let item_width = 160;
+            let max_elements = 188;
+            let mut element_count = 1;
+            let mut element_id = 100;
+            loop {
+                if element_count >= max_elements {
+                    break;
+                }
+                let mut rng = rand::thread_rng();
+                let image_center_x: i32 = rng.gen_range(-900..900);
+                let image_center_y: i32 = rng.gen_range(-600..600);
+                let image_index: u32 = rng.gen_range(1..109);
+                if exist_id.contains_key(&image_index) {
+                    if element_count < 100 {
+                        continue;
+                    }
+                }
+                let file_path = image_dir.clone() + &image_index.to_string() + ".jpg";
+                let cached_image = image_pool.lock().unwrap().get(&file_path).unwrap();
+                let image = cached_image.lock().unwrap();
+                let height = item_width as f32 / (image.width() as f32 / image.height() as f32);
+                let image_rect = Rect::new(
+                    image_center_x as f32 - item_width as f32 / 2.0,
+                    image_center_x as f32 + item_width as f32 / 2.0,
+                    image_center_y as f32 + height / 2.0,
+                    image_center_y as f32 - height / 2.0,
+                );
+                let image_element = ImageElement::new(
+                    element_id,
+                    file_path,
+                    Arc::clone(&cached_image),
+                    (image.width(), image.height()),
+                    image_rect,
+                );
+                canvas.lock().unwrap().add_element(image_element);
+                exist_id.insert(image_index, 1);
+                element_id += 1;
+                element_count += 1;
+            }
+        })
+        .ok();
 }
 
 fn main() {
@@ -69,7 +92,7 @@ fn main() {
         -(window_size.height as f32 / 2.0),
     );
 
-    let mut canvas = pollster::block_on(Canvas::new(
+    let canvas = pollster::block_on(Canvas::new(
         &window,
         Rect::new(
             -(window_size.width as f32),
@@ -78,7 +101,39 @@ fn main() {
             -(window_size.height as f32),
         ),
     ));
-    add_test_element(&mut canvas, window_size.width, window_size.height);
+    let canvas = Arc::new(Mutex::new(canvas));
+    let image_pool = Arc::new(Mutex::new(ImagePool::new()));
+    let image_index;
+    {
+        let current_dir = env::current_dir().unwrap().to_str().unwrap().to_string();
+        let image_dir = if current_dir.contains("examples") {
+            env::current_dir().unwrap().to_str().unwrap().to_string() + "/"
+        } else {
+            env::current_dir().unwrap().to_str().unwrap().to_string() + "/examples/image/"
+        };
+        let item_width = 80;
+        let mut rng = rand::thread_rng();
+        image_index = rng.gen_range(1..109);
+        let file_path = image_dir.clone() + &image_index.to_string() + ".jpg";
+        let cached_image = image_pool.lock().unwrap().get(&file_path).unwrap();
+        let image = cached_image.lock().unwrap();
+        let height = item_width as f32 * (image.width() as f32 / image.height() as f32);
+        let image_rect = Rect::new(
+            -(item_width as f32) / 2.0,
+            item_width as f32 / 2.0,
+            height / 2.0,
+            -(height / 2.0),
+        );
+        let image_element = ImageElement::new(
+            88,
+            file_path,
+            Arc::clone(&cached_image),
+            (image.width(), image.height()),
+            image_rect,
+        );
+        canvas.lock().unwrap().add_element(image_element);
+    }
+    add_test_element(Arc::clone(&canvas), Arc::clone(&image_pool), image_index);
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
@@ -102,7 +157,7 @@ fn main() {
             },
             Event::RedrawRequested(window_id) if window_id == window.id() => {
                 let current = Instant::now();
-                canvas.render(focus_rect);
+                canvas.lock().unwrap().render(focus_rect);
                 println!("render cost:{}", current.elapsed().subsec_millis());
             }
             _ => {}
