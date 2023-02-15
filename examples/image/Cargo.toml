@@ -1,0 +1,16 @@
+[package]
+name = "image_example"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+engine = { path = "../../crates/engine" }
+quadtree= { path = "../../crates/quadtree" }
+winit = "0.26"
+env_logger = "0.9"
+pollster = "0.2"
+image = "0.24.2"
+anyhow = "1.0.57"
+rand = "0.8.5"
