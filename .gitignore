@@ -11,3 +11,6 @@ Cargo.lock
 
 Web/node_modules/*
 Web/build-wasm
+Cmake-build-debug/*
+.idea/*
+.vscode/*

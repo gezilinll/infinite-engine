@@ -3,7 +3,7 @@
 set -e
 
 # 编译
-export OPTIMIZE="-O0 -DNDEBUG -Wl,--no-check-features"
+export OPTIMIZE="-O0 -DNDEBUG -DSK_GL -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0 -Wl,--no-check-features"
 export LDFLAGS="${OPTIMIZE}"
 export CFLAGS="${OPTIMIZE}"
 export CPPFLAGS="${OPTIMIZE}"
@@ -22,6 +22,7 @@ echo "============================================="
   --bind \
   ${OPTIMIZE} \
   -flto \
+  -fno-rtti \
   -fexceptions \
   -s ASSERTIONS=0 \
   -s WASM=1 \
@@ -29,6 +30,7 @@ echo "============================================="
   -s ALLOW_MEMORY_GROWTH=1 \
   -s OFFSCREEN_FRAMEBUFFER=1 \
   -s OFFSCREENCANVAS_SUPPORT=1 \
+  -s EXTRA_EXPORTED_RUNTIME_METHODS='["GL"]' \
   -s SAFE_HEAP=0 \
   -s MODULARIZE=1 \
   -s EXPORT_ES6=1 \
