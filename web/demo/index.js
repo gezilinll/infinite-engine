@@ -9,7 +9,11 @@ import {
 WasmLoader.init().then(async () => {
   let canvas = new Canvas("isurface");
   console.log(canvas);
+
   let context2D = canvas.getContext("2d");
   console.log(context2D);
   context2D.drawSomething();
+
+  canvas.delete();
+  console.log("ALL END");
 });

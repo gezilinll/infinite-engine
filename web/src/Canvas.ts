@@ -24,6 +24,11 @@ export class Canvas {
         this.nativeCanvas = WasmLoader.module.makeCanvas(this.userCanvas!.width, this.userCanvas!.height);
     }
 
+    delete() {
+        this.context2D?.delete();
+        this.nativeCanvas?.delete();
+    }
+
     getContext(contextId: "2d", options?: CanvasRenderingContext2DSettings): CanvasRenderingContext2D | null {
         if (!this.context2D) {
             var ctx = this._getWebGLContext(this.userCanvas!);
