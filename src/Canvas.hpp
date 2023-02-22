@@ -1,7 +1,7 @@
 #include <memory>
 #include <string>
-#include "Macros.hpp"
 #include "CanvasRenderingContextBase.hpp"
+#include "Macros.hpp"
 
 class Canvas {
 public:

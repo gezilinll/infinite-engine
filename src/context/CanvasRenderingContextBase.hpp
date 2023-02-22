@@ -7,13 +7,9 @@
 
 class CanvasRenderingContextBase {
 public:
-    CanvasRenderingContextBase() {
+    CanvasRenderingContextBase() {}
 
-    }
-
-    virtual ~CanvasRenderingContextBase() {
-
-    }
+    virtual ~CanvasRenderingContextBase() {}
 };
 
-#endif //INFINITEENGINE_CANVASRENDERINGCONTEXTBASE_HPP
+#endif  // INFINITEENGINE_CANVASRENDERINGCONTEXTBASE_HPP

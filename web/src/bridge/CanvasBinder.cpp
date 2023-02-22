@@ -1,23 +1,21 @@
 #ifndef INFINITE_CANVAS_BINNDER
 #define INFINITE_CANVAS_BINNDER
 
-#include "Canvas.hpp"
-#include "CanvasRenderingContextSkia.hpp"
 #include <emscripten.h>
 #include <emscripten/bind.h>
-#include <emscripten/val.h>
 #include <emscripten/html5.h>
+#include <emscripten/val.h>
 #include <webgl/webgl1.h>
+#include "Canvas.hpp"
+#include "CanvasRenderingContextSkia.hpp"
 
 using namespace emscripten;
 
-std::shared_ptr<Canvas> makeCanvas(int width, int height)
-{
+std::shared_ptr<Canvas> makeCanvas(int width, int height) {
     return std::make_shared<Canvas>(width, height);
 }
 
-void DrawSomething()
-{
+void DrawSomething() {
     emscripten_glClearColor(0, 0, 0, 0);
 
     // auto canvas = surface->getCanvas();
@@ -37,24 +35,25 @@ void DrawSomething()
     // printf("----- DrawSomething END -----\n");
 }
 
-EMSCRIPTEN_BINDINGS(CanvasBinder)
-{
+EMSCRIPTEN_BINDINGS(CanvasBinder) {
     function("makeCanvas", select_overload<std::shared_ptr<Canvas>(int, int)>(&makeCanvas));
     function("DrawSomething", &DrawSomething);
 
     class_<CanvasRenderingContextSkia>("CanvasRenderingContext2D")
-        .smart_ptr<std::shared_ptr<CanvasRenderingContextSkia>>("std::shared_ptr<CanvasRenderingContext2D>")
-        .function("drawSomething",
-                  optional_override([](CanvasRenderingContextSkia &self) -> void
-                                    { self.drawSomething(); }));
+        .smart_ptr<std::shared_ptr<CanvasRenderingContextSkia>>(
+            "std::shared_ptr<CanvasRenderingContext2D>")
+        .function("drawSomething", optional_override([](CanvasRenderingContextSkia& self) -> void {
+                      self.drawSomething();
+                  }));
 
     class_<Canvas>("Canvas")
         .smart_ptr<std::shared_ptr<Canvas>>("std::shared_ptr<Canvas>")
-        .function("get2DContext",
-                  optional_override([](Canvas &self) -> std::shared_ptr<CanvasRenderingContextSkia>
-                                    { 
-                                        auto baseContext = self.getContext("2d");
-                                        return std::dynamic_pointer_cast<CanvasRenderingContextSkia>(baseContext); }));
+        .function(
+            "get2DContext",
+            optional_override([](Canvas& self) -> std::shared_ptr<CanvasRenderingContextSkia> {
+                auto baseContext = self.getContext("2d");
+                return std::dynamic_pointer_cast<CanvasRenderingContextSkia>(baseContext);
+            }));
 }
 
-#endif // INFINITE_CANVAS_BINNDER
+#endif  // INFINITE_CANVAS_BINNDER

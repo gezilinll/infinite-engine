@@ -5,12 +5,11 @@
 #ifndef INFINITEENGINE_CANVASRENDERINGCONTEXTSKIA_HPP
 #define INFINITEENGINE_CANVASRENDERINGCONTEXTSKIA_HPP
 
-#include "Macros.hpp"
 #include "CanvasRenderingContextBase.hpp"
+#include "Macros.hpp"
 #include "include/core/SkSurface.h"
 
-class CanvasRenderingContextSkia : public CanvasRenderingContextBase
-{
+class CanvasRenderingContextSkia : public CanvasRenderingContextBase {
 public:
     CanvasRenderingContextSkia(int width, int height);
 
@@ -28,4 +27,4 @@ private:
     sk_sp<SkSurface> mSurface;
 };
 
-#endif // INFINITEENGINE_CANVASRENDERINGCONTEXTSKIA_HPP
+#endif  // INFINITEENGINE_CANVASRENDERINGCONTEXTSKIA_HPP

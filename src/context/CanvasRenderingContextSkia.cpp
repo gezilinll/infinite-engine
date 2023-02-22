@@ -6,23 +6,18 @@
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkColorSpace.h"
-#include "include/gpu/GrDirectContext.h"
-#include "include/gpu/gl/GrGLTypes.h"
 #include "include/gpu/GrBackendSurface.h"
+#include "include/gpu/GrDirectContext.h"
 #include "include/gpu/gl/GrGLDefines.h"
 #include "include/gpu/gl/GrGLInterface.h"
+#include "include/gpu/gl/GrGLTypes.h"
 
-struct ColorSettings
-{
-    ColorSettings(sk_sp<SkColorSpace> colorSpace)
-    {
-        if (colorSpace == nullptr || colorSpace->isSRGB())
-        {
+struct ColorSettings {
+    ColorSettings(sk_sp<SkColorSpace> colorSpace) {
+        if (colorSpace == nullptr || colorSpace->isSRGB()) {
             colorType = kRGBA_8888_SkColorType;
             pixFormat = GR_GL_RGBA8;
-        }
-        else
-        {
+        } else {
             colorType = kRGBA_F16_SkColorType;
             pixFormat = GR_GL_RGBA16F;
         }
@@ -31,24 +26,21 @@ struct ColorSettings
     GrGLenum pixFormat;
 };
 
-CanvasRenderingContextSkia::CanvasRenderingContextSkia(int width, int height) : CanvasRenderingContextBase(), mCanvasWidth(width), mCanvasHeight(height)
-{
+CanvasRenderingContextSkia::CanvasRenderingContextSkia(int width, int height)
+    : CanvasRenderingContextBase(), mCanvasWidth(width), mCanvasHeight(height) {
     auto interface = GrGLMakeNativeInterface();
     mContext = GrDirectContext::MakeGL(interface);
 
     makeSurfaceByPlatform();
 }
 
-CanvasRenderingContextSkia::~CanvasRenderingContextSkia() noexcept
-{
-}
+CanvasRenderingContextSkia::~CanvasRenderingContextSkia() noexcept {}
 
-void CanvasRenderingContextSkia::drawSomething()
-{
+void CanvasRenderingContextSkia::drawSomething() {
     auto canvas = mSurface->getCanvas();
     canvas->clear(SK_ColorBLACK);
     auto paint = SkPaint();
-    paint.setColor(SkColorSetARGB(139, 228, 135, 255)); // greenish
+    paint.setColor(SkColorSetARGB(139, 228, 135, 255));  // greenish
     paint.setStyle(SkPaint::Style::kFill_Style);
     paint.setAntiAlias(true);
     canvas->drawOval(SkRect::MakeXYWH(100, 100, 800, 800), paint);
@@ -59,8 +51,7 @@ void CanvasRenderingContextSkia::drawSomething()
 #if IS_WEB
 #include <emscripten/html5.h>
 #include <webgl/webgl1.h>
-void CanvasRenderingContextSkia::makeSurfaceByPlatform()
-{
+void CanvasRenderingContextSkia::makeSurfaceByPlatform() {
     GrGLint sampleCnt;
     emscripten_glGetIntegerv(GL_SAMPLES, &sampleCnt);
 
@@ -82,12 +73,11 @@ void CanvasRenderingContextSkia::makeSurfaceByPlatform()
     const auto colorSettings = ColorSettings(colorSpace);
     info.fFormat = colorSettings.pixFormat;
     GrBackendRenderTarget target(mCanvasWidth, mCanvasHeight, sampleCnt, stencil, info);
-    sk_sp<SkSurface> surface(SkSurface::MakeFromBackendRenderTarget(mContext.get(), target,
-                                                                    kBottomLeft_GrSurfaceOrigin, colorSettings.colorType, colorSpace, nullptr));
+    sk_sp<SkSurface> surface(
+        SkSurface::MakeFromBackendRenderTarget(mContext.get(), target, kBottomLeft_GrSurfaceOrigin,
+                                               colorSettings.colorType, colorSpace, nullptr));
     mSurface = surface;
 }
 #else
-void CanvasRenderingContextSkia::makeSurfaceByPlatform()
-{
-}
+void CanvasRenderingContextSkia::makeSurfaceByPlatform() {}
 #endif

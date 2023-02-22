@@ -12,4 +12,4 @@
 #define IS_WEB 0
 #endif
 
-#endif //INFINITEENGINE_MACROS_HPP
+#endif  // INFINITEENGINE_MACROS_HPP
