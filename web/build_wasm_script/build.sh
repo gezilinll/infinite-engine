@@ -3,7 +3,7 @@
 set -e
 
 # 编译
-export OPTIMIZE="-O0 -DNDEBUG -DSK_GL -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0 -Wl,--no-check-features"
+export OPTIMIZE="-O0 -DNDEBUG -DSK_GL -Wl,--no-check-features"
 export LDFLAGS="${OPTIMIZE}"
 export CFLAGS="${OPTIMIZE}"
 export CPPFLAGS="${OPTIMIZE}"
@@ -22,7 +22,6 @@ echo "============================================="
   --bind \
   ${OPTIMIZE} \
   -flto \
-  -fno-rtti \
   -fexceptions \
   -s ASSERTIONS=0 \
   -s WASM=1 \
@@ -38,11 +37,15 @@ echo "============================================="
   -s EXPORT_NAME=${NAME} \
   -s USE_ES6_IMPORT_META=0 \
   -I ../src/bridge/ \
+  -I ../../src/ \
+  -I ../../src/context \
   -I ../../3rdparty/skia/include \
   -I ../../3rdparty/skia/include/include/core \
   -g \
   -std=c++17 \
   ../src/bridge/*.cpp \
+  ../../src/*.cpp \
+  ../../src/context/*.cpp \
   ../../3rdparty/skia/web/libskia.a \
   -o ${NAME}.js
 )
