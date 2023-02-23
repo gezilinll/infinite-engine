@@ -8,6 +8,7 @@
 #include <webgl/webgl1.h>
 #include "Canvas.hpp"
 #include "CanvasRenderingContextSkia.hpp"
+#include "SkiaUtils.hpp"
 
 using namespace emscripten;
 
@@ -46,6 +47,36 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
                   optional_override([](CanvasRenderingContextSkia& self, float width) -> void {
                       self.setLineWidth(width);
                   }))
+        .function("setShadowOffsetX",
+                  optional_override([](CanvasRenderingContextSkia& self, float value) -> void {
+                      self.setShadowOffsetX(value);
+                  }))
+        .function("setShadowOffsetY",
+                  optional_override([](CanvasRenderingContextSkia& self, float value) -> void {
+                      self.setShadowOffsetY(value);
+                  }))
+        .function("setShadowBlur",
+                  optional_override([](CanvasRenderingContextSkia& self, float value) -> void {
+                      self.setShadowBlur(value);
+                  }))
+        .function("setShadowColor",
+                  optional_override([](CanvasRenderingContextSkia& self,
+                                       std::string value) -> void { self.setShadowColor(value); }))
+        .function("setStrokeStyleColor", optional_override([](CanvasRenderingContextSkia& self,
+                                                              std::string value) -> void {
+                      StrokeStyle result;
+                      result.color = SkiaUtils::parseColorString(value);
+                      self.setStrokeStyle(result);
+                  }))
+        .function("setGlobalAlpha",
+                  optional_override([](CanvasRenderingContextSkia& self, float value) -> void {
+                      self.setGlobalAlpha(value);
+                  }))
+        .function(
+            "setGlobalCompositeOperation",
+            optional_override([](CanvasRenderingContextSkia& self, std::string value) -> void {
+                self.setGlobalCompositeOperation(value);
+            }))
         .function("strokeRect",
                   optional_override([](CanvasRenderingContextSkia& self, float x, float y, float w,
                                        float h) -> void { self.strokeRect(x, y, w, h); }))
@@ -62,7 +93,8 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
                                                  float y) -> void { self.moveTo(x, y); }))
         .function("lineTo", optional_override([](CanvasRenderingContextSkia& self, float x,
                                                  float y) -> void { self.lineTo(x, y); }))
-        .function("stroke", optional_override([](CanvasRenderingContextSkia& self) -> void { self.stroke(); }));
+        .function("stroke", optional_override(
+                                [](CanvasRenderingContextSkia& self) -> void { self.stroke(); }));
 
     class_<Canvas>("Canvas")
         .smart_ptr<std::shared_ptr<Canvas>>("std::shared_ptr<Canvas>")

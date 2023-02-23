@@ -1,4 +1,3 @@
-import { EmbindObject } from "./WasmLoader";
 
 export class CanvasRenderingContext2D {
     private _nativeContext: any = undefined;
@@ -13,7 +12,50 @@ export class CanvasRenderingContext2D {
     }
 
     set lineWidth(newWidth: number) {
+        if (!isFinite(newWidth)) {
+            return;
+        }
         this._nativeContext?.setLineWidth(newWidth);
+    }
+
+    set shadowOffsetX(offset: number) {
+        if (!isFinite(offset)) {
+            return;
+        }
+        this._nativeContext?.setShadowOffsetX(offset);
+    }
+
+    set shadowOffsetY(offset: number) {
+        if (!isFinite(offset)) {
+            return;
+        }
+        this._nativeContext?.setShadowOffsetY(offset);
+    }
+
+    set shadowBlur(blurValue: number) {
+        if (!isFinite(blurValue)) {
+            return;
+        }
+        this._nativeContext?.setShadowBlur(blurValue);
+    }
+
+    set shadowColor(color: string) {
+        this._nativeContext?.setShadowColor(color);
+    }
+
+    set strokeStyle(style: string) {
+        this._nativeContext?.setStrokeStyleColor(style);
+    }
+
+    set globalAlpha(alpha: number) {
+        if (!isFinite(alpha)) {
+            return;
+        }
+        this._nativeContext?.setGlobalAlpha(alpha);
+    }
+
+    set globalCompositeOperation(operation: string) {
+        this._nativeContext?.setGlobalCompositeOperation(operation);
     }
 
     strokeRect(x: number, y: number, width: number, height: number) {

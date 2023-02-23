@@ -3,10 +3,11 @@
 //
 
 #include "CanvasRenderingContextSkia.hpp"
-#include "SkiaUtils.hpp"
+#include "include/core/SkBlurTypes.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkColorSpace.h"
+#include "include/core/SkMaskFilter.h"
 #include "include/core/SkPathEffect.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/gpu/GrDirectContext.h"
@@ -49,28 +50,26 @@ void CanvasRenderingContextSkia::setLineDash(LineDash lineDash) { mLineDash = li
 void CanvasRenderingContextSkia::strokeRect(SkScalar x, SkScalar y, SkScalar width,
                                             SkScalar height) {
     auto strokePaint = getStrokePaint();
-
-    //    auto shadowPaint = getShadowPaint();
-    //    if (shadowPaint) {
-    //        mSurface->getCanvas()->save();
-    //        this._applyShadowOffsetMatrix();
-    //        mSurface->getCanvas()->drawRect(SkRect::MakeXYWH(x, y, width, height),
-    //        shadowPaint.get()); mSurface->getCanvas()->.restore();
-    //    }
+    SkPaint shadowPaint;
+    if (initShadowPaintIfNeed(shadowPaint, strokePaint)) {
+        mSurface->getCanvas()->save();
+        applyShadowOffsetMatrix();
+        mSurface->getCanvas()->drawRect(SkRect::MakeXYWH(x, y, width, height), shadowPaint);
+        mSurface->getCanvas()->restore();
+    }
     mSurface->getCanvas()->drawRect(SkRect::MakeXYWH(x, y, width, height), strokePaint);
 }
 
 void CanvasRenderingContextSkia::fillRect(SkScalar x, SkScalar y, SkScalar width, SkScalar height) {
     auto fillPaint = getFillPaint();
 
-    //    var shadowPaint = this._shadowPaint(fillPaint);
-    //    if (shadowPaint) {
-    //        this._canvas.save();
-    //        this._applyShadowOffsetMatrix();
-    //        this._canvas.drawRect(CanvasKit.XYWHRect(x, y, width, height), shadowPaint);
-    //        this._canvas.restore();
-    //        shadowPaint.dispose();
-    //    }
+    SkPaint shadowPaint;
+    if (initShadowPaintIfNeed(shadowPaint, fillPaint)) {
+        mSurface->getCanvas()->save();
+        applyShadowOffsetMatrix();
+        mSurface->getCanvas()->drawRect(SkRect::MakeXYWH(x, y, width, height), shadowPaint);
+        mSurface->getCanvas()->restore();
+    }
 
     mSurface->getCanvas()->drawRect(SkRect::MakeXYWH(x, y, width, height), fillPaint);
 }
@@ -79,7 +78,8 @@ SkPaint CanvasRenderingContextSkia::getStrokePaint() {
     SkPaint paint = mPaint;
     paint.setStyle(SkPaint::Style::kStroke_Style);
     if (mStrokeStyle.type == StrokeStyleType::Color) {
-        paint.setColor(SkiaUtils::parseColorString(mStrokeStyle.color, mGlobalAlpha));
+        Color color = SkiaUtils::multiplyByAlpha(mStrokeStyle.color, mGlobalAlpha);
+        paint.setColor(SkColorSetARGB(color.A, color.R, color.G, color.B));
     } else {
         // TODO
     }
@@ -95,24 +95,51 @@ SkPaint CanvasRenderingContextSkia::getFillPaint() {
     SkPaint paint = mPaint;
     paint.setStyle(SkPaint::Style::kFill_Style);
     if (mStrokeStyle.type == StrokeStyleType::Color) {
-        paint.setColor(SkiaUtils::parseColorString(mStrokeStyle.color, mGlobalAlpha));
+        Color color = SkiaUtils::multiplyByAlpha(mStrokeStyle.color, mGlobalAlpha);
+        paint.setColor(SkColorSetARGB(color.A, color.R, color.G, color.B));
     } else {
         // TODO
     }
     return paint;
 }
 
+bool CanvasRenderingContextSkia::initShadowPaintIfNeed(SkPaint& shadow, SkPaint& base) {
+    // multiply first to see if the alpha channel goes to 0 after multiplication.
+    Color alphaColor = SkiaUtils::multiplyByAlpha(mShadowColor, mGlobalAlpha);
+    // if alpha is zero, no shadows
+    if (!alphaColor.A) {
+        return false;
+    }
+    // one of these must also be non-zero (otherwise the shadow is
+    // completely hidden.  And the spec says so).
+    if (!(mShadowBlur || mShadowOffsetX || mShadowOffsetY)) {
+        return false;
+    }
+    shadow = base;
+    shadow.setColor(SkColorSetARGB(alphaColor.A, alphaColor.R, alphaColor.G, alphaColor.B));
+    auto blurEffect
+        = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, mShadowBlur / 2, false);
+    shadow.setMaskFilter(blurEffect);
+    return true;
+}
+
+void CanvasRenderingContextSkia::applyShadowOffsetMatrix() {
+    SkMatrix inverted = mCurrentTransform;
+    mCurrentTransform.invert(&inverted);
+    mSurface->getCanvas()->concat(inverted);
+    mSurface->getCanvas()->concat(SkMatrix::Translate(mShadowOffsetX, mShadowOffsetY));
+    mSurface->getCanvas()->concat(mCurrentTransform);
+}
+
 void CanvasRenderingContextSkia::stroke() {
     SkPaint strokePaint = getStrokePaint();
-
-    //    var shadowPaint = this._shadowPaint(strokePaint);
-    //    if (shadowPaint) {
-    //        this._canvas.save();
-    //        this._applyShadowOffsetMatrix();
-    //        this._canvas.drawPath(path, shadowPaint);
-    //        this._canvas.restore();
-    //        shadowPaint.dispose();
-    //    }
+    SkPaint shadowPaint;
+    if (initShadowPaintIfNeed(shadowPaint, strokePaint)) {
+        mSurface->getCanvas()->save();
+        applyShadowOffsetMatrix();
+        mSurface->getCanvas()->drawPath(mCurrentPath, shadowPaint);
+        mSurface->getCanvas()->restore();
+    }
 
     mSurface->getCanvas()->drawPath(mCurrentPath, strokePaint);
 }

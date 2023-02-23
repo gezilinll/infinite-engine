@@ -8,10 +8,11 @@
 #include "CanvasRenderingContextBase.hpp"
 #include "Macros.hpp"
 #include "SkiaModels.hpp"
-#include "include/core/SkPaint.h"
-#include "include/core/SkSurface.h"
-#include "include/core/SkPath.h"
+#include "SkiaUtils.hpp"
 #include "include/core/SkBlendMode.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPath.h"
+#include "include/core/SkSurface.h"
 
 class CanvasRenderingContextSkia : public CanvasRenderingContextBase {
 public:
@@ -20,19 +21,44 @@ public:
     ~CanvasRenderingContextSkia() noexcept;
 
     void setLineWidth(SkScalar width) {
-        mStrokeWidth = width;
-        printf("setLineWidth %f\n", mStrokeWidth);
+        if (width > 0) {
+            mStrokeWidth = width;
+        }
     }
 
     void setStrokeStyle(StrokeStyle style) { mStrokeStyle = style; }
 
-    void strokeRect(SkScalar x, SkScalar y, SkScalar width, SkScalar height);
+    void setShadowOffsetX(SkScalar offset) { mShadowOffsetX = offset; }
 
-    void fillRect(SkScalar x, SkScalar y, SkScalar width, SkScalar height);
+    void setShadowOffsetY(SkScalar offset) { mShadowOffsetY = offset; }
+
+    void setShadowColor(std::string color) { mShadowColor = SkiaUtils::parseColorString(color); }
+
+    void setShadowBlur(SkScalar blurValue) {
+        if (blurValue >= 0) {
+            mShadowBlur = blurValue;
+        }
+    }
 
     void setLineDash(LineDash lineDash);
 
-    void setShadowColor(std::string color) { mShadowColor = color; }
+    void setGlobalAlpha(SkScalar alpha) {
+        if (alpha < 0 || alpha > 1) {
+            return;
+        }
+        mGlobalAlpha = alpha;
+    }
+
+    void setGlobalCompositeOperation(std::string operation) {
+        try {
+            mGlobalCompositeOperation = SkiaUtils::parseBlendModeString(operation);
+        } catch (const char* msg) {
+        }
+    }
+
+    void strokeRect(SkScalar x, SkScalar y, SkScalar width, SkScalar height);
+
+    void fillRect(SkScalar x, SkScalar y, SkScalar width, SkScalar height);
 
     void beginPath() { mCurrentPath.reset(); }
 
@@ -51,10 +77,9 @@ private:
 
     SkPaint getFillPaint();
 
-    // Returns the shadow paint for the current settings or null if there
-    // should be no shadow. This ends up being a copy of the given
-    // paint with a blur maskfilter and the correct color.
-    //    std::shared_ptr<SkPaint> getShadowPaint();
+    bool initShadowPaintIfNeed(SkPaint& shadow, SkPaint& base);
+
+    void applyShadowOffsetMatrix();
 
 private:
     int mCanvasWidth;
@@ -67,8 +92,12 @@ private:
     SkScalar mStrokeWidth = 1;
 
     SkPath mCurrentPath;
+    SkMatrix mCurrentTransform;
 
-    std::string mShadowColor = "#00000000";
+    Color mShadowColor = {0, 0, 0, 0};
+    SkScalar mShadowOffsetX = 0;
+    SkScalar mShadowOffsetY = 0;
+    SkScalar mShadowBlur = 0;
 
     SkPaint mPaint;
     sk_sp<GrDirectContext> mContext;

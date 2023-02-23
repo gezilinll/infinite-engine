@@ -1,6 +1,14 @@
 //@ts-ignore
 import Module from "./wasm/InfiniteEngine";
 
+export interface EmbindObject<T extends EmbindObject<T>> {
+    clone(): T;
+    delete(): void;
+    deleteLater(): void;
+    isAliasOf(other: any): boolean;
+    isDeleted(): boolean;
+}
+
 export class WasmLoader {
     public static module: any = undefined;
 
