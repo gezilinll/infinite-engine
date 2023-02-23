@@ -42,9 +42,27 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
     class_<CanvasRenderingContextSkia>("CanvasRenderingContext2D")
         .smart_ptr<std::shared_ptr<CanvasRenderingContextSkia>>(
             "std::shared_ptr<CanvasRenderingContext2D>")
-        .function("drawSomething", optional_override([](CanvasRenderingContextSkia& self) -> void {
-                      self.drawSomething();
-                  }));
+        .function("setLineWidth",
+                  optional_override([](CanvasRenderingContextSkia& self, float width) -> void {
+                      self.setLineWidth(width);
+                  }))
+        .function("strokeRect",
+                  optional_override([](CanvasRenderingContextSkia& self, float x, float y, float w,
+                                       float h) -> void { self.strokeRect(x, y, w, h); }))
+        .function("fillRect",
+                  optional_override([](CanvasRenderingContextSkia& self, float x, float y, float w,
+                                       float h) -> void { self.fillRect(x, y, w, h); }))
+        .function("beginPath", optional_override([](CanvasRenderingContextSkia& self) -> void {
+                      self.beginPath();
+                  }))
+        .function("closePath", optional_override([](CanvasRenderingContextSkia& self) -> void {
+                      self.closePath();
+                  }))
+        .function("moveTo", optional_override([](CanvasRenderingContextSkia& self, float x,
+                                                 float y) -> void { self.moveTo(x, y); }))
+        .function("lineTo", optional_override([](CanvasRenderingContextSkia& self, float x,
+                                                 float y) -> void { self.lineTo(x, y); }))
+        .function("stroke", optional_override([](CanvasRenderingContextSkia& self) -> void { self.stroke(); }));
 
     class_<Canvas>("Canvas")
         .smart_ptr<std::shared_ptr<Canvas>>("std::shared_ptr<Canvas>")

@@ -4,9 +4,9 @@ import { CanvasRenderingContext2D } from "./CanvasRenderingContext2D";
 type WebGLContextHandle = number;
 
 export class Canvas {
-    private userCanvas: HTMLCanvasElement | OffscreenCanvas | null = null;
-    private nativeCanvas: any = undefined;
-    private context2D: any = undefined;
+    private _userCanvas: HTMLCanvasElement | OffscreenCanvas | null = null;
+    private _nativeCanvas: any = undefined;
+    private _context2D: CanvasRenderingContext2D | null = null;
 
     constructor(idOrElement: HTMLCanvasElement | OffscreenCanvas | string) {
         var isHTMLCanvas = typeof HTMLCanvasElement !== 'undefined' && idOrElement instanceof HTMLCanvasElement;
@@ -15,29 +15,29 @@ export class Canvas {
             if (!document.getElementById(idOrElement as string)) {
                 throw 'Canvas with id ' + idOrElement + ' was not found';
             } else {
-                this.userCanvas = document.getElementById(idOrElement as string) as HTMLCanvasElement;
+                this._userCanvas = document.getElementById(idOrElement as string) as HTMLCanvasElement;
             }
         } else {
-            this.userCanvas = isHTMLCanvas ? idOrElement as HTMLCanvasElement : idOrElement as OffscreenCanvas;
+            this._userCanvas = isHTMLCanvas ? idOrElement as HTMLCanvasElement : idOrElement as OffscreenCanvas;
         }
 
-        this.nativeCanvas = WasmLoader.module.makeCanvas(this.userCanvas!.width, this.userCanvas!.height);
+        this._nativeCanvas = WasmLoader.module.makeCanvas(this._userCanvas!.width, this._userCanvas!.height);
     }
 
     delete() {
-        this.context2D?.delete();
-        this.nativeCanvas?.delete();
+        this._context2D?.delete();
+        this._nativeCanvas?.delete();
     }
 
     getContext(contextId: "2d", options?: CanvasRenderingContext2DSettings): CanvasRenderingContext2D | null {
-        if (!this.context2D) {
-            var ctx = this._getWebGLContext(this.userCanvas!);
+        if (!this._context2D) {
+            var ctx = this._getWebGLContext(this._userCanvas!);
             if (!ctx || ctx < 0) {
                 throw 'failed to create webgl context: err ' + ctx;
             }
-            this.context2D = this.nativeCanvas.get2DContext();
+            this._context2D = new CanvasRenderingContext2D(this._nativeCanvas.get2DContext());
         }
-        return this.context2D;
+        return this._context2D;
     }
 
     private _getWebGLContext(canvas: HTMLCanvasElement | OffscreenCanvas): WebGLContextHandle {
