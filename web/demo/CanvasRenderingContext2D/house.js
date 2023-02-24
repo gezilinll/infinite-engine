@@ -24,7 +24,7 @@ WasmLoader.init().then(async () => {
 
   // ---------------- Render Example Code ---------------- 
   let startX = 300, startY = 50, lineHeight = 20;
-  context2D.fillText("The code below is render by infinite-canvas, so you can't copy it. ^_^", startX, startY);
+  context2D.fillText("The code below is rendered by infinite-canvas, so you can't copy it. ^_^", startX, startY);
 
   startY += lineHeight;
   context2D.fillText("---------- WEB house.js----------", startX, startY += lineHeight);

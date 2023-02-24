@@ -14,3 +14,4 @@ Web/build-wasm
 Cmake-build-debug/*
 .idea/*
 .vscode/*
+web/dist/*
