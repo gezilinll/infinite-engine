@@ -11,12 +11,14 @@ export interface EmbindObject<T extends EmbindObject<T>> {
 
 export class WasmLoader {
     public static module: any = undefined;
+    public static wasmPath = "InfiniteEngine.wasm";
 
     public static async init() {
         return new Promise(async (resolve, reject) => {
             const instance = await Module({
                 locateFile: (path: string) => {
-                    return path;
+                    console.log("init " + WasmLoader.wasmPath);
+                    return WasmLoader.wasmPath;
                 },
             }).then((module: Module) => {
                 return module;

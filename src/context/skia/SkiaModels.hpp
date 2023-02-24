@@ -23,6 +23,14 @@ struct Color {
     float A = 0;
 };
 
+struct Font {
+    std::string style;
+    std::string variant;
+    std::string weight;
+    int sizePx = 0;
+    std::string family;
+};
+
 enum class StrokeStyleType { Color };
 
 struct StrokeStyle {

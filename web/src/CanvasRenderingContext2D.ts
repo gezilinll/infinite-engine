@@ -66,6 +66,10 @@ export class CanvasRenderingContext2D {
         this._nativeContext?.fillRect(x, y, width, height);
     }
 
+    fillText(text: string, x: number, y: number, maxWidth?: number) {
+        this._nativeContext?.fillText(text, x, y, 0);
+    }
+
     beginPath() {
         this._nativeContext?.beginPath();
     }

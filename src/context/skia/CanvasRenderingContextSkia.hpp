@@ -10,6 +10,7 @@
 #include "SkiaModels.hpp"
 #include "SkiaUtils.hpp"
 #include "include/core/SkBlendMode.h"
+#include "include/core/SkFont.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
 #include "include/core/SkSurface.h"
@@ -51,7 +52,16 @@ public:
 
     void setGlobalCompositeOperation(std::string operation) {
         try {
-            mGlobalCompositeOperation = SkiaUtils::parseBlendModeString(operation);
+            auto result = SkiaUtils::parseBlendModeString(operation);
+            mGlobalCompositeOperation = result;
+        } catch (const char* msg) {
+        }
+    }
+
+    void setFont(std::string fontStr) {
+        try {
+            auto result = SkiaUtils::parseFontString(fontStr);
+
         } catch (const char* msg) {
         }
     }
@@ -69,6 +79,8 @@ public:
     void closePath() { mCurrentPath.close(); }
 
     void stroke();
+
+    void fillText(std::string text, SkScalar x, SkScalar y, SkScalar maxWidth = 0);
 
 private:
     void makeSurfaceByPlatform();
@@ -98,6 +110,8 @@ private:
     SkScalar mShadowOffsetX = 0;
     SkScalar mShadowOffsetY = 0;
     SkScalar mShadowBlur = 0;
+
+    SkFont mFont;
 
     SkPaint mPaint;
     sk_sp<GrDirectContext> mContext;

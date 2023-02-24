@@ -18,6 +18,8 @@ public:
 
     static SkBlendMode parseBlendModeString(std::string blendModeStr);
 
+    static Font parseFontString(std::string fontStr);
+
 private:
     static std::unordered_map<std::string, SkBlendMode> sBlendModeMap;
 };

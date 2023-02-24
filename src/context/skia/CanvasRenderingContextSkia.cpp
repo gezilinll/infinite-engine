@@ -9,6 +9,7 @@
 #include "include/core/SkColorSpace.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkPathEffect.h"
+#include "include/core/SkTextBlob.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/gl/GrGLDefines.h"
@@ -37,6 +38,9 @@ CanvasRenderingContextSkia::CanvasRenderingContextSkia(int width, int height)
     mPaint.setStrokeJoin(SkPaint::Join::kMiter_Join);
     mPaint.setStrokeWidth(mStrokeWidth);
     mPaint.setBlendMode(mGlobalCompositeOperation);
+
+    mFont = SkFont(nullptr, 16);  // TODO default should be 10
+    mFont.setSubpixel(true);
 
     auto interface = GrGLMakeNativeInterface();
     mContext = GrDirectContext::MakeGL(interface);
@@ -72,6 +76,26 @@ void CanvasRenderingContextSkia::fillRect(SkScalar x, SkScalar y, SkScalar width
     }
 
     mSurface->getCanvas()->drawRect(SkRect::MakeXYWH(x, y, width, height), fillPaint);
+}
+
+void CanvasRenderingContextSkia::fillText(std::string text, SkScalar x, SkScalar y,
+                                          SkScalar maxWidth) {
+    // TODO do something with maxWidth, probably involving measure
+    printf("fillText %s %f %f %f\n", text.data(), x, y, maxWidth);
+    auto fillPaint = getFillPaint();
+    auto blob = SkTextBlob::MakeFromString(text.data(), mFont, SkTextEncoding::kUTF8);
+    printf("%f %f %f %f\n", blob->bounds().x(), blob->bounds().y(), blob->bounds().width(),
+           blob->bounds().height());
+
+    SkPaint shadowPaint;
+    if (initShadowPaintIfNeed(shadowPaint, fillPaint)) {
+        mSurface->getCanvas()->save();
+        applyShadowOffsetMatrix();
+        mSurface->getCanvas()->drawTextBlob(blob, x, y, shadowPaint);
+        mSurface->getCanvas()->restore();
+    }
+
+    mSurface->getCanvas()->drawTextBlob(blob, x, y, fillPaint);
 }
 
 SkPaint CanvasRenderingContextSkia::getStrokePaint() {

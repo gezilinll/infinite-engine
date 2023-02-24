@@ -4,6 +4,7 @@
 
 #include "SkiaUtils.hpp"
 #include <algorithm>
+#include <regex>
 #include <sstream>
 
 std::unordered_map<std::string, SkBlendMode> SkiaUtils::sBlendModeMap;
@@ -115,4 +116,53 @@ SkBlendMode SkiaUtils::parseBlendModeString(std::string blendModeStr) {
         throw blendModeStr + " is not supported";
     }
     return it->second;
+}
+
+Font SkiaUtils::parseFontString(std::string fontStr) {
+    static std::regex regex(
+        reinterpret_cast<const char*>('(italic|oblique|normal|)\\s*' +               // style
+                                      '(small-caps|normal|)\\s*' +                   // variant
+                                      '(bold|bolder|lighter|[1-9]00|normal|)\\s*' +  // weight
+                                      '([\\d\\.]+)' +                                // size
+                                      "(px|pt|pc|in|cm|mm|%|em|ex|ch|rem|q)" +       // unit
+                                      // line-height is ignored here, as per the spec
+                                      '(.+)'));  // family
+    static int defaultHeight = 16;
+    std::cmatch cm;
+    std::regex_match(fontStr.data(), cm, regex);
+    if (cm.empty()) {
+        throw "Invalid font string " + fontStr;
+    }
+    float size = std::stof(cm[4]);
+    int sizePx = defaultHeight;
+    std::string unit = cm[5];
+    if (unit == "em" || unit == "rem") {
+        sizePx = size * defaultHeight;
+    } else if (unit == "pt") {
+        sizePx = size * 4 / 3;
+    } else if (unit == "px") {
+        size = size;
+    } else if (unit == "pc") {
+        sizePx = size * defaultHeight;
+    } else if (unit == "in") {
+        sizePx = size * 96;
+    } else if (unit == "cm") {
+        sizePx = size * 96.0 / 2.54;
+    } else if (unit == "mm") {
+        sizePx = size * (96.0 / 25.4);
+    } else if (unit == "q") {
+        sizePx = size * (96.0 / 25.4 / 4);
+    } else if (unit == "%") {
+        sizePx = size * (defaultHeight / 75);
+    }
+    Font result;
+    result.style = cm[1];
+    result.variant = cm[2];
+    result.weight = cm[3];
+    result.sizePx = sizePx;
+    result.family = cm[6];
+    result.family.erase(remove(result.family.begin(), result.family.end(), ' '),
+                        result.family.end());
+
+    return result;
 }

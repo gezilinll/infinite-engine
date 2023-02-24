@@ -1,17 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>browser-worker</title>
-</head>
+  <head>
+    <style>
+      .selected{font-weight:bold; font-size: 18px; color:#000;}
+      * {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite-Engine Docs</title>
+  </head>
 
-<body>
-  <div id="app"></div>
-  <canvas id="isurface" width="300" height="300"></canvas>
-  <script type="module" src="./index.js"></script>
-</body>
+  <body>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script type="module" src="./index.js"></script>
+    <div style="height: 66px;background:#e9e9e9;">
+      <font face="serif" size="15" color="#008000"><p style="font-size:
+          40px;color:#000000; margin-left: 12px; ;">Infinite
+          Engine</p></font>
+    </div>
+    <div class="main_left"
+      style="width:15%;height:100vh;float:left;cursor:pointer;background:#f7f7f7;padding-left:
+      20px;padding-top: 10px;">
+      <ul>
+        <li class="selected" data-src="CanvasRenderingContext2D/house.html"
+          style="list-style:none;">CanvasRenderingContext2D</li>
+      </ul>
+    </div>
+    <div style="width:80%;height:100vh;margin-left:20%;">
+      <iframe frameborder="0" scrolling="no"
+        style="overflow:hidden;height:100%;width:100%"
+        src="CanvasRenderingContext2D/house.html"></iframe>
+    </div>
+  </body>
 
 </html>
