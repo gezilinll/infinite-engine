@@ -1,10 +1,10 @@
-import { WasmLoader } from "../../src/WasmLoader";
+import { CanvasLoader } from "../../src/CanvasLoader";
 import { Canvas } from "../../src/Canvas";
 
-const { default: wasmURL } = await import('../InfiniteEngine.wasm?url');
-WasmLoader.wasmPath = wasmURL;
+const { default: wasmURL } = await import('../InfiniteCanvas.wasm?url');
+CanvasLoader.wasmPath = wasmURL;
 
-WasmLoader.init().then(async () => {
+CanvasLoader.init().then(async () => {
   let canvas = new Canvas("isurface");
   let context2D = canvas.getContext("2d");
 

@@ -8,14 +8,14 @@ export LDFLAGS="${OPTIMIZE}"
 export CFLAGS="${OPTIMIZE}"
 export CPPFLAGS="${OPTIMIZE}"
 
-NAME="InfiniteEngine"
+NAME="InfiniteCanvas"
 work_path='build-wasm'
 rm -fr ${work_path}
 mkdir -p ${work_path}
 cd ./${work_path}
 
 echo "============================================="
-echo "Compiling InfiniteEngine Module"
+echo "Compiling InfiniteCanvas Module"
 echo "============================================="
 (
   emcc \
@@ -60,5 +60,5 @@ cp build-wasm/${NAME}.js src/wasm
 cp build-wasm/${NAME}.wasm demo
 
 echo "============================================="
-echo "InfiniteEngine module Compiled"
+echo "InfiniteCanvas module Compiled"
 echo "============================================="

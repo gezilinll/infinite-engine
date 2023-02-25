@@ -81,11 +81,8 @@ void CanvasRenderingContextSkia::fillRect(SkScalar x, SkScalar y, SkScalar width
 void CanvasRenderingContextSkia::fillText(std::string text, SkScalar x, SkScalar y,
                                           SkScalar maxWidth) {
     // TODO do something with maxWidth, probably involving measure
-    printf("fillText %s %f %f %f\n", text.data(), x, y, maxWidth);
     auto fillPaint = getFillPaint();
     auto blob = SkTextBlob::MakeFromString(text.data(), mFont, SkTextEncoding::kUTF8);
-    printf("%f %f %f %f\n", blob->bounds().x(), blob->bounds().y(), blob->bounds().width(),
-           blob->bounds().height());
 
     SkPaint shadowPaint;
     if (initShadowPaintIfNeed(shadowPaint, fillPaint)) {

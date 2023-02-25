@@ -1,11 +1,12 @@
 {
-  "name": "infinite-engine",
+  "name": "infinite-canvas",
   "version": "1.0.0",
   "description": "",
   "main": "./src/InfiniteEngine.ts",
   "scripts": {
     "build:ts": "npx tsc -p tsconfig.json",
-    "build-static": "npx vite build && mv dist/assets dist/demo",
+    "build:lib": "rm -rf dist && npx vite build --config vite.config.lib.js && npx tsc -p tsconfig.json",
+    "build:page": "rm -rf dist && npx vite build --config vite.config.page.js && tsc -p tsconfig.json && mv dist/assets dist/demo",
     "dev": "NODE_OPTIONS=--max_old_space_size=2048 vite"
   },
   "author": "",
