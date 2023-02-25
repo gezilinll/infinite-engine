@@ -1,0 +1,13 @@
+{
+  "name": "ez-infinite-canvas",
+  "version": "0.0.3",
+  "description": "A cross-platform 2D/3D canvas and designed like web-canvas",
+  "main": "infinite-canvas.es.js",
+  "repository": "https://github.com/gezilinll/infinite-engine",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "gezilinll",
+  "license": "MIT"
+}

@@ -1,16 +1,22 @@
 {
-  "name": "infinite-canvas",
-  "version": "1.0.0",
+  "name": "ez-infinite-canvas",
+  "version": "0.0.1",
   "description": "",
-  "main": "./src/InfiniteEngine.ts",
+  "main": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/infinite-canvas.es.js",
+      "require": "./dist/infinite-canvas.umd.js"
+    }
+  },
   "scripts": {
     "build:ts": "npx tsc -p tsconfig.json",
-    "build:lib": "rm -rf dist && npx vite build --config vite.config.lib.js && npx tsc -p tsconfig.json",
+    "build:lib": "rm -rf dist && npx vite build --config vite.config.lib.js && npx tsc -p tsconfig.json && cp package.lib.json dist/package.json",
     "build:page": "rm -rf dist && npx vite build --config vite.config.page.js && tsc -p tsconfig.json && mv dist/assets dist/demo",
     "dev": "NODE_OPTIONS=--max_old_space_size=2048 vite"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "gezilinll",
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^18.11.8",
     "leancloud-storage": "^4.9.0",

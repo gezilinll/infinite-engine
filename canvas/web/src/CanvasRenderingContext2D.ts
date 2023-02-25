@@ -1,4 +1,3 @@
-
 export class CanvasRenderingContext2D {
     private _nativeContext: any = undefined;
 
