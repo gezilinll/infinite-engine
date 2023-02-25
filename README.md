@@ -1,6 +1,7 @@
 ![infinite-engine](logo.jpg)
 
-[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/gezilinll/Infinite-engine/blob/main/README.en.md)[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/gezilinll/infinite-engine/blob/main/LICENSE)
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/gezilinll/Infinite-engine/blob/main/README.en.md)
+[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/gezilinll/infinite-engine/blob/main/LICENSE)
 
 # Infinite-engine
 

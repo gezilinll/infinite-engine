@@ -11,7 +11,7 @@ export interface EmbindObject<T extends EmbindObject<T>> {
 
 export class CanvasLoader {
     public static module: any = undefined;
-    public static wasmPath = "InfiniteCanvas.wasm";
+    public static wasmPath = "http://rqm1nmwwk.hn-bkt.clouddn.com/InfiniteCanvas.wasm";
 
     public static async init() {
         return new Promise(async (resolve, reject) => {
