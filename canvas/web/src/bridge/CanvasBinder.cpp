@@ -61,6 +61,10 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
                   optional_override([](CanvasRenderingContextSkia& self, std::string cap) -> void {
                       self.setLineCap(cap);
                   }))
+        .function("setLineJoin",
+                  optional_override([](CanvasRenderingContextSkia& self, std::string join) -> void {
+                      self.setLineJoin(join);
+                  }))
         .function("setLineWidth",
                   optional_override([](CanvasRenderingContextSkia& self, float width) -> void {
                       self.setLineWidth(width);

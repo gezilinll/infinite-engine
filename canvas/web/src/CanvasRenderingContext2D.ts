@@ -63,6 +63,10 @@ export class CanvasRenderingContext2D {
         this._nativeContext?.setLineCap(cap);
     }
 
+    set lineJoin(join: string) {
+        this._nativeContext?.setLineJoin(join);
+    }
+
     set lineDashOffset(value: number) {
         this._nativeContext?.setLineDashOffset(value);
     }

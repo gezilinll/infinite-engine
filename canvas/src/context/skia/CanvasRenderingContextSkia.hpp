@@ -37,6 +37,16 @@ public:
         }
     }
 
+    void setLineJoin(std::string join) {
+        if (join == "miter") {
+            mPaint.setStrokeJoin(SkPaint::Join::kMiter_Join);
+        } else if (join == "round") {
+            mPaint.setStrokeJoin(SkPaint::Join::kRound_Join);
+        } else if (join == "bevel") {
+            mPaint.setStrokeJoin(SkPaint::Join::kBevel_Join);
+        }
+    }
+
     void setLineDashOffset(SkScalar value) { mLineDashOffset = value; }
 
     void setStrokeStyle(FillStrokeStyle style) { mStrokeStyle = style; }

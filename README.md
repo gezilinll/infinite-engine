@@ -84,6 +84,7 @@ CanvasLoader.init().then(async () => {
 | imageSmoothingEnabled    |                        |         |      |         |      |       |
 | lineCap                  | :white_check_mark:     |         |      |         |      |       |
 | lineDashOffset           | :white_check_mark:     |         |      |         |      |       |
+| lineJoin                 |                        |         |      |         |      |       |
 | shadowBlur               | :white_check_mark:     |         |      |         |      |       |
 | shadowColor              | :white_check_mark:     |         |      |         |      |       |
 | shadowOffsetX            | :white_check_mark:     |         |      |         |      |       |
