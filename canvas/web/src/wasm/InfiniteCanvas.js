@@ -25,6 +25,8 @@ var Module = typeof InfiniteCanvas != 'undefined' ? InfiniteCanvas : {};
 
 // See https://caniuse.com/mdn-javascript_builtins_object_assign
 
+// See https://caniuse.com/mdn-javascript_builtins_bigint64array
+
 // Set up the promise that indicates the Module is initialized
 var readyPromiseResolve, readyPromiseReject;
 Module['ready'] = new Promise(function(resolve, reject) {
@@ -214,6 +216,26 @@ function uleb128Encode(n) {
   return [(n % 128) | 128, n >> 7];
 }
 
+// Converts a signature like 'vii' into a description of the wasm types, like
+// { parameters: ['i32', 'i32'], results: [] }.
+function sigToWasmTypes(sig) {
+  var typeNames = {
+    'i': 'i32',
+    'j': 'i64',
+    'f': 'f32',
+    'd': 'f64',
+    'p': 'i32',
+  };
+  var type = {
+    parameters: [],
+    results: sig[0] == 'v' ? [] : [typeNames[sig[0]]]
+  };
+  for (var i = 1; i < sig.length; ++i) {
+    type.parameters.push(typeNames[sig[i]]);
+  }
+  return type;
+}
+
 // Wraps a JS function as a wasm function with a given signature.
 function convertJsFunctionToWasm(func, sig) {
 
@@ -222,20 +244,7 @@ function convertJsFunctionToWasm(func, sig) {
   // Otherwise, construct a minimal wasm module importing the JS function and
   // re-exporting it.
   if (typeof WebAssembly.Function == "function") {
-    var typeNames = {
-      'i': 'i32',
-      'j': 'i64',
-      'f': 'f32',
-      'd': 'f64'
-    };
-    var type = {
-      parameters: [],
-      results: sig[0] == 'v' ? [] : [typeNames[sig[0]]]
-    };
-    for (var i = 1; i < sig.length; ++i) {
-      type.parameters.push(typeNames[sig[i]]);
-    }
-    return new WebAssembly.Function(type, func);
+    return new WebAssembly.Function(sigToWasmTypes(sig), func);
   }
 
   // The module is static, with the exception of the type section, which is
@@ -248,6 +257,7 @@ function convertJsFunctionToWasm(func, sig) {
   var sigParam = sig.slice(1);
   var typeCodes = {
     'i': 0x7f, // i32
+    'p': 0x7f, // i32
     'j': 0x7e, // i64
     'f': 0x7d, // f32
     'd': 0x7c, // f64
@@ -403,50 +413,6 @@ if (typeof WebAssembly != 'object') {
   abort('no native wasm support detected');
 }
 
-// include: runtime_safe_heap.js
-
-
-// In MINIMAL_RUNTIME, setValue() and getValue() are only available when
-// building with safe heap enabled, for heap safety checking.
-// In traditional runtime, setValue() and getValue() are always available
-// (although their use is highly discouraged due to perf penalties)
-
-/** @param {number} ptr
-    @param {number} value
-    @param {string} type
-    @param {number|boolean=} noSafe */
-function setValue(ptr, value, type = 'i8', noSafe) {
-  if (type.endsWith('*')) type = 'i32';
-  switch (type) {
-    case 'i1': HEAP8[((ptr)>>0)] = value; break;
-    case 'i8': HEAP8[((ptr)>>0)] = value; break;
-    case 'i16': HEAP16[((ptr)>>1)] = value; break;
-    case 'i32': HEAP32[((ptr)>>2)] = value; break;
-    case 'i64': (tempI64 = [value>>>0,(tempDouble=value,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? ((Math.min((+(Math.floor((tempDouble)/4294967296.0))), 4294967295.0))|0)>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)],HEAP32[((ptr)>>2)] = tempI64[0],HEAP32[(((ptr)+(4))>>2)] = tempI64[1]); break;
-    case 'float': HEAPF32[((ptr)>>2)] = value; break;
-    case 'double': HEAPF64[((ptr)>>3)] = value; break;
-    default: abort('invalid type for setValue: ' + type);
-  }
-}
-
-/** @param {number} ptr
-    @param {string} type
-    @param {number|boolean=} noSafe */
-function getValue(ptr, type = 'i8', noSafe) {
-  if (type.endsWith('*')) type = 'i32';
-  switch (type) {
-    case 'i1': return HEAP8[((ptr)>>0)];
-    case 'i8': return HEAP8[((ptr)>>0)];
-    case 'i16': return HEAP16[((ptr)>>1)];
-    case 'i32': return HEAP32[((ptr)>>2)];
-    case 'i64': return HEAP32[((ptr)>>2)];
-    case 'float': return HEAPF32[((ptr)>>2)];
-    case 'double': return Number(HEAPF64[((ptr)>>3)]);
-    default: abort('invalid type for getValue: ' + type);
-  }
-}
-
-// end include: runtime_safe_heap.js
 // Wasm globals
 
 var wasmMemory;
@@ -506,7 +472,10 @@ function ccall(ident, returnType, argTypes, args, opts) {
   };
 
   function convertReturnValue(ret) {
-    if (returnType === 'string') return UTF8ToString(ret);
+    if (returnType === 'string') {
+      
+      return UTF8ToString(ret);
+    }
     if (returnType === 'boolean') return Boolean(ret);
     return ret;
   }
@@ -655,7 +624,6 @@ function UTF8ArrayToString(heapOrArray, idx, maxBytesToRead) {
  * @return {string}
  */
 function UTF8ToString(ptr, maxBytesToRead) {
-  ;
   return ptr ? UTF8ArrayToString(HEAPU8, ptr, maxBytesToRead) : '';
 }
 
@@ -1150,12 +1118,16 @@ function abort(what) {
   // Use a wasm runtime error, because a JS error might be seen as a foreign
   // exception, which means we'd run destructors on it. We need the error to
   // simply make the program stop.
+  // FIXME This approach does not work in Wasm EH because it currently does not assume
+  // all RuntimeErrors are from traps; it decides whether a RuntimeError is from
+  // a trap or not based on a hidden field within the object. So at the moment
+  // we don't have a way of throwing a wasm trap from JS. TODO Make a JS API that
+  // allows this in the wasm spec.
 
   // Suppress closure compiler warning here. Closure compiler's builtin extern
   // defintion for WebAssembly.RuntimeError claims it takes no arguments even
   // though it can.
   // TODO(https://github.com/google/closure-compiler/pull/3913): Remove if/when upstream closure gets fixed.
-
   /** @suppress {checkTypes} */
   var e = new WebAssembly.RuntimeError(what);
 
@@ -1351,26 +1323,8 @@ var ASM_CONSTS = {
 
   function callRuntimeCallbacks(callbacks) {
       while (callbacks.length > 0) {
-        var callback = callbacks.shift();
-        if (typeof callback == 'function') {
-          callback(Module); // Pass the module as the first argument.
-          continue;
-        }
-        var func = callback.func;
-        if (typeof func == 'number') {
-          if (callback.arg === undefined) {
-            // Run the wasm function ptr with signature 'v'. If no function
-            // with such signature was exported, this call does not need
-            // to be emitted (and would confuse Closure)
-            getWasmTableEntry(func)();
-          } else {
-            // If any function with signature 'vi' was exported, run
-            // the callback with that signature.
-            getWasmTableEntry(func)(callback.arg);
-          }
-        } else {
-          func(callback.arg === undefined ? null : callback.arg);
-        }
+        // Pass the module as the first argument.
+        callbacks.shift()(Module);
       }
     }
 
@@ -1392,6 +1346,27 @@ var ASM_CONSTS = {
           var y = demangle(x);
           return x === y ? x : (y + ' [' + x + ']');
         });
+    }
+
+  
+    /**
+     * @param {number} ptr
+     * @param {string} type
+     */
+  function getValue(ptr, type = 'i8') {
+      if (type.endsWith('*')) type = '*';
+      switch (type) {
+        case 'i1': return HEAP8[((ptr)>>0)];
+        case 'i8': return HEAP8[((ptr)>>0)];
+        case 'i16': return HEAP16[((ptr)>>1)];
+        case 'i32': return HEAP32[((ptr)>>2)];
+        case 'i64': return HEAP32[((ptr)>>2)];
+        case 'float': return HEAPF32[((ptr)>>2)];
+        case 'double': return HEAPF64[((ptr)>>3)];
+        case '*': return HEAPU32[((ptr)>>2)];
+        default: abort('invalid type for getValue: ' + type);
+      }
+      return null;
     }
 
   var wasmTableMirror = [];
@@ -1431,6 +1406,27 @@ var ASM_CONSTS = {
         }
       }
       return error.stack.toString();
+    }
+
+  
+    /**
+     * @param {number} ptr
+     * @param {number} value
+     * @param {string} type
+     */
+  function setValue(ptr, value, type = 'i8') {
+      if (type.endsWith('*')) type = '*';
+      switch (type) {
+        case 'i1': HEAP8[((ptr)>>0)] = value; break;
+        case 'i8': HEAP8[((ptr)>>0)] = value; break;
+        case 'i16': HEAP16[((ptr)>>1)] = value; break;
+        case 'i32': HEAP32[((ptr)>>2)] = value; break;
+        case 'i64': (tempI64 = [value>>>0,(tempDouble=value,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? ((Math.min((+(Math.floor((tempDouble)/4294967296.0))), 4294967295.0))|0)>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)],HEAP32[((ptr)>>2)] = tempI64[0],HEAP32[(((ptr)+(4))>>2)] = tempI64[1]); break;
+        case 'float': HEAPF32[((ptr)>>2)] = value; break;
+        case 'double': HEAPF64[((ptr)>>3)] = value; break;
+        case '*': HEAPU32[((ptr)>>2)] = value; break;
+        default: abort('invalid type for setValue: ' + type);
+      }
     }
 
   function setWasmTableEntry(idx, func) {
@@ -2234,11 +2230,7 @@ var ASM_CONSTS = {
         },allocate:function(stream, offset, length) {
           MEMFS.expandFileStorage(stream.node, offset + length);
           stream.node.usedBytes = Math.max(stream.node.usedBytes, offset + length);
-        },mmap:function(stream, address, length, position, prot, flags) {
-          if (address !== 0) {
-            // We don't currently support location hints for the address of the mapping
-            throw new FS.ErrnoError(28);
-          }
+        },mmap:function(stream, length, position, prot, flags) {
           if (!FS.isFile(stream.node.mode)) {
             throw new FS.ErrnoError(43);
           }
@@ -2518,29 +2510,39 @@ var ASM_CONSTS = {
           FS.FSStream = /** @constructor */ function() {
             this.shared = { };
           };
-          FS.FSStream.prototype = {
+          FS.FSStream.prototype = {};
+          Object.defineProperties(FS.FSStream.prototype, {
             object: {
+              /** @this {FS.FSStream} */
               get: function() { return this.node; },
+              /** @this {FS.FSStream} */
               set: function(val) { this.node = val; }
             },
             isRead: {
+              /** @this {FS.FSStream} */
               get: function() { return (this.flags & 2097155) !== 1; }
             },
             isWrite: {
+              /** @this {FS.FSStream} */
               get: function() { return (this.flags & 2097155) !== 0; }
             },
             isAppend: {
+              /** @this {FS.FSStream} */
               get: function() { return (this.flags & 1024); }
             },
             flags: {
+              /** @this {FS.FSStream} */
               get: function() { return this.shared.flags; },
+              /** @this {FS.FSStream} */
               set: function(val) { this.shared.flags = val; },
             },
             position : {
-              get function() { return this.shared.position; },
+              /** @this {FS.FSStream} */
+              get: function() { return this.shared.position; },
+              /** @this {FS.FSStream} */
               set: function(val) { this.shared.position = val; },
             },
-          };
+          });
         }
         // clone it, so we can return an instance of FSStream
         stream = Object.assign(new FS.FSStream(), stream);
@@ -3187,7 +3189,7 @@ var ASM_CONSTS = {
           throw new FS.ErrnoError(138);
         }
         stream.stream_ops.allocate(stream, offset, length);
-      },mmap:(stream, address, length, position, prot, flags) => {
+      },mmap:(stream, length, position, prot, flags) => {
         // User requests writing to file (prot & PROT_WRITE != 0).
         // Checking if we have permissions to write to the file unless
         // MAP_PRIVATE flag is set. According to POSIX spec it is possible
@@ -3205,7 +3207,7 @@ var ASM_CONSTS = {
         if (!stream.stream_ops.mmap) {
           throw new FS.ErrnoError(43);
         }
-        return stream.stream_ops.mmap(stream, address, length, position, prot, flags);
+        return stream.stream_ops.mmap(stream, length, position, prot, flags);
       },msync:(stream, buffer, offset, length, mmapFlags) => {
         if (!stream || !stream.stream_ops.msync) {
           return 0;
@@ -3389,8 +3391,7 @@ var ASM_CONSTS = {
         FS.createStandardStreams();
       },quit:() => {
         FS.init.initialized = false;
-        // Call musl-internal function to close all stdio streams, so nothing is
-        // left in internal buffers.
+        // force-flush all streams, so we get musl std streams printed out
         // close all of our streams
         for (var i = 0; i < FS.streams.length; i++) {
           var stream = FS.streams[i];
@@ -3683,9 +3684,7 @@ var ASM_CONSTS = {
             return fn.apply(null, arguments);
           };
         });
-        // use a custom read function
-        stream_ops.read = (stream, buffer, offset, length, position) => {
-          FS.forceLoadFile(node);
+        function writeChunks(stream, buffer, offset, length, position) {
           var contents = stream.node.contents;
           if (position >= contents.length)
             return 0;
@@ -3700,6 +3699,21 @@ var ASM_CONSTS = {
             }
           }
           return size;
+        }
+        // use a custom read function
+        stream_ops.read = (stream, buffer, offset, length, position) => {
+          FS.forceLoadFile(node);
+          return writeChunks(stream, buffer, offset, length, position)
+        };
+        // use a custom mmap function
+        stream_ops.mmap = (stream, length, position, prot, flags) => {
+          FS.forceLoadFile(node);
+          var ptr = mmapAlloc(length);
+          if (!ptr) {
+            throw new FS.ErrnoError(48);
+          }
+          writeChunks(stream, HEAP8, ptr, length, position);
+          return { ptr: ptr, allocated: true };
         };
         node.stream_ops = stream_ops;
         return node;
@@ -3914,7 +3928,7 @@ var ASM_CONSTS = {
         case 8:
           return -28; // These are for sockets. We don't have them fully implemented yet.
         case 9:
-          // musl trusts getown return values, due to a bug where they must be, as they overlap with errors. just return -1 here, so fnctl() returns that, and we set errno ourselves.
+          // musl trusts getown return values, due to a bug where they must be, as they overlap with errors. just return -1 here, so fcntl() returns that, and we set errno ourselves.
           setErrNo(28);
           return -1;
         default: {
@@ -4047,7 +4061,6 @@ var ASM_CONSTS = {
   function __embind_register_bigint(primitiveType, name, size, minRange, maxRange) {}
 
   function getShiftFromSize(size) {
-      
       switch (size) {
           case 1: return 0;
           case 2: return 1;
@@ -4633,7 +4646,7 @@ var ASM_CONSTS = {
       }
   
       if (!handle.$$) {
-        throwBindingError('Cannot pass "' + _embind_repr(handle) + '" as a ' + this.name);
+        throwBindingError('Cannot pass "' + embindRepr(handle) + '" as a ' + this.name);
       }
       if (!handle.$$.ptr) {
         throwBindingError('Cannot pass deleted object as a pointer of type ' + this.name);
@@ -4662,7 +4675,7 @@ var ASM_CONSTS = {
       }
   
       if (!handle.$$) {
-        throwBindingError('Cannot pass "' + _embind_repr(handle) + '" as a ' + this.name);
+        throwBindingError('Cannot pass "' + embindRepr(handle) + '" as a ' + this.name);
       }
       if (!handle.$$.ptr) {
         throwBindingError('Cannot pass deleted object as a pointer of type ' + this.name);
@@ -4728,7 +4741,7 @@ var ASM_CONSTS = {
       }
   
       if (!handle.$$) {
-        throwBindingError('Cannot pass "' + _embind_repr(handle) + '" as a ' + this.name);
+        throwBindingError('Cannot pass "' + embindRepr(handle) + '" as a ' + this.name);
       }
       if (!handle.$$.ptr) {
         throwBindingError('Cannot pass deleted object as a pointer of type ' + this.name);
@@ -4742,7 +4755,7 @@ var ASM_CONSTS = {
     }
   
   function simpleReadValueFromPointer(pointer) {
-      return this['fromWireType'](HEAPU32[pointer >> 2]);
+      return this['fromWireType'](HEAP32[((pointer)>>2)]);
     }
   
   function RegisteredPointer_getPointee(ptr) {
@@ -4841,7 +4854,7 @@ var ASM_CONSTS = {
     }
   
   function dynCallLegacy(sig, ptr, args) {
-      var f = Module["dynCall_" + sig];
+      var f = Module['dynCall_' + sig];
       return args && args.length ? f.apply(null, [ptr].concat(args)) : f.call(null, ptr);
     }
   /** @param {Object=} args */
@@ -4852,7 +4865,8 @@ var ASM_CONSTS = {
       if (sig.includes('j')) {
         return dynCallLegacy(sig, ptr, args);
       }
-      return getWasmTableEntry(ptr).apply(null, args)
+      var rtn = getWasmTableEntry(ptr).apply(null, args);
+      return rtn;
     }
   function getDynCaller(sig, ptr) {
       var argCache = [];
@@ -5142,10 +5156,11 @@ var ASM_CONSTS = {
     }
   
   function heap32VectorToArray(count, firstElement) {
-      
       var array = [];
       for (var i = 0; i < count; i++) {
-          array.push(HEAP32[(firstElement >> 2) + i]);
+          // TODO(https://github.com/emscripten-core/emscripten/issues/17310):
+          // Find a way to hoist the `>> 2` or `>> 3` out of this loop.
+          array.push(HEAPU32[(((firstElement)+(i * 4))>>2)]);
       }
       return array;
     }
@@ -5285,7 +5300,7 @@ var ASM_CONSTS = {
       });
     }
 
-  function _embind_repr(v) {
+  function embindRepr(v) {
       if (v === null) {
           return 'null';
       }
@@ -5363,7 +5378,9 @@ var ASM_CONSTS = {
     }
   function __embind_register_integer(primitiveType, name, size, minRange, maxRange) {
       name = readLatin1String(name);
-      if (maxRange === -1) { // LLVM doesn't have signed and unsigned 32-bit types, so u32 literals come out as 'i32 -1'. Always treat those as max u32.
+      // LLVM doesn't have signed and unsigned 32-bit types, so u32 literals come
+      // out as 'i32 -1'. Always treat those as max u32.
+      if (maxRange === -1) {
           maxRange = 4294967295;
       }
   
@@ -5482,14 +5499,15 @@ var ASM_CONSTS = {
       registerType(rawType, {
           name: name,
           'fromWireType': function(value) {
-              var length = HEAPU32[value >> 2];
+              var length = HEAPU32[((value)>>2)];
+              var payload = value + 4;
   
               var str;
               if (stdStringIsUTF8) {
-                  var decodeStartPtr = value + 4;
+                  var decodeStartPtr = payload;
                   // Looping here to support possible embedded '0' bytes
                   for (var i = 0; i <= length; ++i) {
-                      var currentBytePtr = value + 4 + i;
+                      var currentBytePtr = payload + i;
                       if (i == length || HEAPU8[currentBytePtr] == 0) {
                           var maxRead = currentBytePtr - decodeStartPtr;
                           var stringSegment = UTF8ToString(decodeStartPtr, maxRead);
@@ -5505,7 +5523,7 @@ var ASM_CONSTS = {
               } else {
                   var a = new Array(length);
                   for (var i = 0; i < length; ++i) {
-                      a[i] = String.fromCharCode(HEAPU8[value + 4 + i]);
+                      a[i] = String.fromCharCode(HEAPU8[payload + i]);
                   }
                   str = a.join('');
               }
@@ -5519,24 +5537,24 @@ var ASM_CONSTS = {
                   value = new Uint8Array(value);
               }
   
-              var getLength;
+              var length;
               var valueIsOfTypeString = (typeof value == 'string');
   
               if (!(valueIsOfTypeString || value instanceof Uint8Array || value instanceof Uint8ClampedArray || value instanceof Int8Array)) {
                   throwBindingError('Cannot pass non-string to std::string');
               }
               if (stdStringIsUTF8 && valueIsOfTypeString) {
-                  getLength = () => lengthBytesUTF8(value);
+                  length = lengthBytesUTF8(value);
               } else {
-                  getLength = () => value.length;
+                  length = value.length;
               }
   
               // assumes 4-byte alignment
-              var length = getLength();
-              var ptr = _malloc(4 + length + 1);
-              HEAPU32[ptr >> 2] = length;
+              var base = _malloc(4 + length + 1);
+              var ptr = base + 4;
+              HEAPU32[((base)>>2)] = length;
               if (stdStringIsUTF8 && valueIsOfTypeString) {
-                  stringToUTF8(value, ptr + 4, length + 1);
+                  stringToUTF8(value, ptr, length + 1);
               } else {
                   if (valueIsOfTypeString) {
                       for (var i = 0; i < length; ++i) {
@@ -5545,19 +5563,19 @@ var ASM_CONSTS = {
                               _free(ptr);
                               throwBindingError('String has UTF-16 code units that do not fit in 8 bits');
                           }
-                          HEAPU8[ptr + 4 + i] = charCode;
+                          HEAPU8[ptr + i] = charCode;
                       }
                   } else {
                       for (var i = 0; i < length; ++i) {
-                          HEAPU8[ptr + 4 + i] = value[i];
+                          HEAPU8[ptr + i] = value[i];
                       }
                   }
               }
   
               if (destructors !== null) {
-                  destructors.push(_free, ptr);
+                  destructors.push(_free, base);
               }
-              return ptr;
+              return base;
           },
           'argPackAdvance': 8,
           'readValueFromPointer': simpleReadValueFromPointer,
@@ -5667,17 +5685,17 @@ var ASM_CONSTS = {
       }
       return impl;
     }
-  function __emval_lookupTypes(argCount, argTypes) {
+  function emval_lookupTypes(argCount, argTypes) {
       var a = new Array(argCount);
       for (var i = 0; i < argCount; ++i) {
-        a[i] = requireRegisteredType(HEAP32[(argTypes >> 2) + i],
+        a[i] = requireRegisteredType(HEAPU32[(((argTypes)+(i * POINTER_SIZE))>>2)],
                                      "parameter " + i);
       }
       return a;
     }
   function __emval_call(handle, argCount, argTypes, argv) {
       handle = Emval.toValue(handle);
-      var types = __emval_lookupTypes(argCount, argTypes);
+      var types = emval_lookupTypes(argCount, argTypes);
   
       var args = new Array(argCount);
       for (var i = 0; i < argCount; ++i) {
@@ -5697,18 +5715,18 @@ var ASM_CONSTS = {
       }
     }
 
-  function __emval_take_value(type, argv) {
+  function __emval_take_value(type, arg) {
       type = requireRegisteredType(type, '_emval_take_value');
-      var v = type['readValueFromPointer'](argv);
+      var v = type['readValueFromPointer'](arg);
       return Emval.toHandle(v);
     }
 
-  function __mmap_js(addr, len, prot, flags, fd, off, allocated, builtin) {
+  function __mmap_js(len, prot, flags, fd, off, allocated) {
   try {
   
-      var info = FS.getStream(fd);
-      if (!info) return -8;
-      var res = FS.mmap(info, addr, len, off, prot, flags);
+      var stream = FS.getStream(fd);
+      if (!stream) return -8;
+      var res = FS.mmap(stream, len, off, prot, flags);
       var ptr = res.ptr;
       HEAP32[((allocated)>>2)] = res.allocated;
       return ptr;
@@ -7843,7 +7861,7 @@ var ASM_CONSTS = {
       HEAPU8.copyWithin(dest, src, src + num);
     }
 
-  function _emscripten_get_heap_max() {
+  function getHeapMax() {
       // Stay one Wasm page short of 4GB: while e.g. Chrome is able to allocate
       // full 4GB Wasm memories, the size will wrap back to 0 bytes in Wasm side
       // for any code that deals with heap sizes, which would require special
@@ -7887,7 +7905,7 @@ var ASM_CONSTS = {
   
       // A limit is set for how much we can grow. We should not exceed that
       // (the wasm binary specifies it, so if we tried, we'd fail anyhow).
-      var maxHeapSize = _emscripten_get_heap_max();
+      var maxHeapSize = getHeapMax();
       if (requestedSize > maxHeapSize) {
         return false;
       }
@@ -7952,7 +7970,7 @@ var ASM_CONSTS = {
       var bufSize = 0;
       getEnvStrings().forEach(function(string, i) {
         var ptr = environ_buf + bufSize;
-        HEAP32[(((__environ)+(i * 4))>>2)] = ptr;
+        HEAPU32[(((__environ)+(i*4))>>2)] = ptr;
         writeAsciiToMemory(string, ptr);
         bufSize += string.length + 1;
       });
@@ -7961,12 +7979,12 @@ var ASM_CONSTS = {
 
   function _environ_sizes_get(penviron_count, penviron_buf_size) {
       var strings = getEnvStrings();
-      HEAP32[((penviron_count)>>2)] = strings.length;
+      HEAPU32[((penviron_count)>>2)] = strings.length;
       var bufSize = 0;
       strings.forEach(function(string) {
         bufSize += string.length + 1;
       });
-      HEAP32[((penviron_buf_size)>>2)] = bufSize;
+      HEAPU32[((penviron_buf_size)>>2)] = bufSize;
       return 0;
     }
 
@@ -7996,12 +8014,16 @@ var ASM_CONSTS = {
       }
       return ret;
     }
+  
+  function convertI32PairToI53Checked(lo, hi) {
+      return ((hi + 0x200000) >>> 0 < 0x400001 - !!lo) ? (lo >>> 0) + hi * 4294967296 : NaN;
+    }
   function _fd_pread(fd, iov, iovcnt, offset_low, offset_high, pnum) {
   try {
   
-      
+      var offset = convertI32PairToI53Checked(offset_low, offset_high); if (isNaN(offset)) return 61;
       var stream = SYSCALLS.getStreamFromFD(fd)
-      var num = doReadv(stream, iov, iovcnt, offset_low);
+      var num = doReadv(stream, iov, iovcnt, offset);
       HEAP32[((pnum)>>2)] = num;
       return 0;
     } catch (e) {
@@ -8026,18 +8048,8 @@ var ASM_CONSTS = {
   function _fd_seek(fd, offset_low, offset_high, whence, newOffset) {
   try {
   
-      
+      var offset = convertI32PairToI53Checked(offset_low, offset_high); if (isNaN(offset)) return 61;
       var stream = SYSCALLS.getStreamFromFD(fd);
-      var HIGH_OFFSET = 0x100000000; // 2^32
-      // use an unsigned operator on low and shift high by 32-bits
-      var offset = offset_high * HIGH_OFFSET + (offset_low >>> 0);
-  
-      var DOUBLE_LIMIT = 0x20000000000000; // 2^53
-      // we also check for equality since DOUBLE_LIMIT + 1 == DOUBLE_LIMIT
-      if (offset <= -DOUBLE_LIMIT || offset >= DOUBLE_LIMIT) {
-        return 61;
-      }
-  
       FS.llseek(stream, offset, whence);
       (tempI64 = [stream.position>>>0,(tempDouble=stream.position,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? ((Math.min((+(Math.floor((tempDouble)/4294967296.0))), 4294967295.0))|0)>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)],HEAP32[((newOffset)>>2)] = tempI64[0],HEAP32[(((newOffset)+(4))>>2)] = tempI64[1]);
       if (stream.getdents && offset === 0 && whence === 0) stream.getdents = null; // reset readdir state
@@ -8064,10 +8076,9 @@ var ASM_CONSTS = {
   function _fd_write(fd, iov, iovcnt, pnum) {
   try {
   
-      ;
       var stream = SYSCALLS.getStreamFromFD(fd);
       var num = doWritev(stream, iov, iovcnt);
-      HEAP32[((pnum)>>2)] = num;
+      HEAPU32[((pnum)>>2)] = num;
       return 0;
     } catch (e) {
     if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e;
@@ -8712,8 +8723,11 @@ var asmLibraryArg = {
   "invoke_fiii": invoke_fiii,
   "invoke_i": invoke_i,
   "invoke_ii": invoke_ii,
+  "invoke_iif": invoke_iif,
+  "invoke_iiffff": invoke_iiffff,
   "invoke_iii": invoke_iii,
   "invoke_iiif": invoke_iiif,
+  "invoke_iiiff": invoke_iiiff,
   "invoke_iiii": invoke_iiii,
   "invoke_iiiii": invoke_iiiii,
   "invoke_iiiiid": invoke_iiiiid,
@@ -8728,7 +8742,6 @@ var asmLibraryArg = {
   "invoke_vi": invoke_vi,
   "invoke_vif": invoke_vif,
   "invoke_vii": invoke_vii,
-  "invoke_viif": invoke_viif,
   "invoke_viifff": invoke_viifff,
   "invoke_viiffi": invoke_viiffi,
   "invoke_viii": invoke_viii,
@@ -9071,10 +9084,10 @@ function invoke_viiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9) {
   }
 }
 
-function invoke_viif(index,a1,a2,a3) {
+function invoke_iif(index,a1,a2) {
   var sp = stackSave();
   try {
-    getWasmTableEntry(index)(a1,a2,a3);
+    return getWasmTableEntry(index)(a1,a2);
   } catch(e) {
     stackRestore(sp);
     if (e !== e+0) throw e;
@@ -9097,6 +9110,28 @@ function invoke_viiffi(index,a1,a2,a3,a4,a5) {
   var sp = stackSave();
   try {
     getWasmTableEntry(index)(a1,a2,a3,a4,a5);
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_iiiff(index,a1,a2,a3,a4) {
+  var sp = stackSave();
+  try {
+    return getWasmTableEntry(index)(a1,a2,a3,a4);
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_iiffff(index,a1,a2,a3,a4,a5) {
+  var sp = stackSave();
+  try {
+    return getWasmTableEntry(index)(a1,a2,a3,a4,a5);
   } catch(e) {
     stackRestore(sp);
     if (e !== e+0) throw e;

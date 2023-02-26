@@ -27,7 +27,9 @@ public:
         }
     }
 
-    void setStrokeStyle(StrokeStyle style) { mStrokeStyle = style; }
+    void setStrokeStyle(FillStrokeStyle style) { mStrokeStyle = style; }
+
+    void setFillStyle(FillStrokeStyle style) { mFillStyle = style; }
 
     void setShadowOffsetX(SkScalar offset) { mShadowOffsetX = offset; }
 
@@ -61,7 +63,6 @@ public:
     void setFont(std::string fontStr) {
         try {
             auto result = SkiaUtils::parseFontString(fontStr);
-
         } catch (const char* msg) {
         }
     }
@@ -69,6 +70,9 @@ public:
     void strokeRect(SkScalar x, SkScalar y, SkScalar width, SkScalar height);
 
     void fillRect(SkScalar x, SkScalar y, SkScalar width, SkScalar height);
+
+    void arc(SkScalar x, SkScalar y, SkScalar radius, SkScalar startAngle, SkScalar endAngle,
+             bool anticlockwise);
 
     void beginPath() { mCurrentPath.reset(); }
 
@@ -79,6 +83,8 @@ public:
     void closePath() { mCurrentPath.close(); }
 
     void stroke();
+
+    void fill();
 
     void fillText(std::string text, SkScalar x, SkScalar y, SkScalar maxWidth = 0);
 
@@ -99,14 +105,15 @@ private:
     SkScalar mGlobalAlpha = 1;
     SkBlendMode mGlobalCompositeOperation = SkBlendMode::kSrcOver;
 
-    StrokeStyle mStrokeStyle;
+    FillStrokeStyle mStrokeStyle;
+    FillStrokeStyle mFillStyle;
     LineDash mLineDash;
     SkScalar mStrokeWidth = 1;
 
     SkPath mCurrentPath;
     SkMatrix mCurrentTransform;
 
-    Color mShadowColor = {0, 0, 0, 0};
+    SkColor mShadowColor = SK_ColorTRANSPARENT;
     SkScalar mShadowOffsetX = 0;
     SkScalar mShadowOffsetY = 0;
     SkScalar mShadowBlur = 0;

@@ -46,6 +46,10 @@ export class CanvasRenderingContext2D {
         this._nativeContext?.setStrokeStyleColor(style);
     }
 
+    set fillStyle(style: string) {
+        this._nativeContext?.setFillStyleColor(style);
+    }
+
     set globalAlpha(alpha: number) {
         if (!isFinite(alpha)) {
             return;
@@ -55,6 +59,19 @@ export class CanvasRenderingContext2D {
 
     set globalCompositeOperation(operation: string) {
         this._nativeContext?.setGlobalCompositeOperation(operation);
+    }
+
+    set direction(direction: string) {
+        this._nativeContext?.setDirection(direction);
+    }
+
+    arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, anticlockwise: boolean) {
+        // Note input angles are radians.
+        this._nativeContext?.arc(x, y, radius, startAngle, endAngle, anticlockwise);
+    }
+
+    fill() {
+        this._nativeContext?.fill();
     }
 
     strokeRect(x: number, y: number, width: number, height: number) {

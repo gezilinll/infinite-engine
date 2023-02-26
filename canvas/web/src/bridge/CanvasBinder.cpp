@@ -64,10 +64,19 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
                                        std::string value) -> void { self.setShadowColor(value); }))
         .function("setStrokeStyleColor", optional_override([](CanvasRenderingContextSkia& self,
                                                               std::string value) -> void {
-                      StrokeStyle result;
+                      FillStrokeStyle result;
                       result.color = SkiaUtils::parseColorString(value);
                       self.setStrokeStyle(result);
                   }))
+        .function("setFillStyleColor", optional_override([](CanvasRenderingContextSkia& self,
+                                                            std::string value) -> void {
+                      FillStrokeStyle result;
+                      result.color = SkiaUtils::parseColorString(value);
+                      self.setFillStyle(result);
+                  }))
+        // .function("setDirection",
+        //           optional_override([](CanvasRenderingContextSkia& self,
+        //                                std::string value) -> void { self.setDirection(value); }))
         .function("setGlobalAlpha",
                   optional_override([](CanvasRenderingContextSkia& self, float value) -> void {
                       self.setGlobalAlpha(value);
@@ -77,6 +86,13 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
             optional_override([](CanvasRenderingContextSkia& self, std::string value) -> void {
                 self.setGlobalCompositeOperation(value);
             }))
+        .function("arc", optional_override([](CanvasRenderingContextSkia& self, float x, float y,
+                                              float radius, float startAngle, float endAngle,
+                                              bool anticlockwise) -> void {
+                      self.arc(x, y, radius, startAngle, endAngle, anticlockwise);
+                  }))
+        .function("fill",
+                  optional_override([](CanvasRenderingContextSkia& self) -> void { self.fill(); }))
         .function("strokeRect",
                   optional_override([](CanvasRenderingContextSkia& self, float x, float y, float w,
                                        float h) -> void { self.strokeRect(x, y, w, h); }))

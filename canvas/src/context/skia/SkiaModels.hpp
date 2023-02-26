@@ -6,23 +6,8 @@
 #define INFINITEENGINE_SKIAMODELS_HPP
 #include <string>
 #include <vector>
+#include "include/core/SkColor.h"
 #include "include/core/SkScalar.h"
-
-// 255
-struct Color {
-    Color(float _r, float _g, float _b, float _a) {
-        R = _r;
-        G = _g;
-        B = _b;
-        A = _a;
-    }
-
-    float R = 0;
-    float G = 0;
-    float B = 0;
-    float A = 0;
-};
-
 struct Font {
     std::string style;
     std::string variant;
@@ -31,11 +16,11 @@ struct Font {
     std::string family;
 };
 
-enum class StrokeStyleType { Color };
+struct FillStrokeStyle {
+    enum class StyleType { Color };
 
-struct StrokeStyle {
-    StrokeStyleType type = StrokeStyleType::Color;
-    Color color = {0, 0, 0, 255};
+    StyleType type = StyleType::Color;
+    SkColor color = SK_ColorBLACK;
 };
 
 struct LineDash {

@@ -17,3 +17,4 @@ Canvas/Cmake-build-debug/*
 Canvas/web/dist/*
 Canvas/.idea/*
 Canvas/.vscode/*
+Cmake-build-debug/*

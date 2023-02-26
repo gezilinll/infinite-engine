@@ -40,15 +40,15 @@ echo "============================================="
   -I ../../src/ \
   -I ../../src/context \
   -I ../../src/context/skia \
-  -I ../../3rdparty/skia/include \
-  -I ../../3rdparty/skia/include/include/core \
+  -I ../../../3rdparty/skia/include \
+  -I ../../../3rdparty/skia/include/include/core \
   -g \
   -std=c++17 \
   ../src/bridge/*.cpp \
   ../../src/*.cpp \
   /Users/linbinghe/Github/skia-builder/skia/src/fonts/NotoMono-Regular.ttf.cpp \
   ../../src/context/skia/*.cpp \
-  ../../3rdparty/skia/web/libskia.a \
+  ../../../3rdparty/skia/web/libskia.a \
   -o ${NAME}.js
 )
 

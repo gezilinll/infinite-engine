@@ -98,9 +98,8 @@ void CanvasRenderingContextSkia::fillText(std::string text, SkScalar x, SkScalar
 SkPaint CanvasRenderingContextSkia::getStrokePaint() {
     SkPaint paint = mPaint;
     paint.setStyle(SkPaint::Style::kStroke_Style);
-    if (mStrokeStyle.type == StrokeStyleType::Color) {
-        Color color = SkiaUtils::multiplyByAlpha(mStrokeStyle.color, mGlobalAlpha);
-        paint.setColor(SkColorSetARGB(color.A, color.R, color.G, color.B));
+    if (mStrokeStyle.type == FillStrokeStyle::StyleType::Color) {
+        paint.setColor(SkiaUtils::multiplyByAlpha(mStrokeStyle.color, mGlobalAlpha));
     } else {
         // TODO
     }
@@ -115,9 +114,8 @@ SkPaint CanvasRenderingContextSkia::getStrokePaint() {
 SkPaint CanvasRenderingContextSkia::getFillPaint() {
     SkPaint paint = mPaint;
     paint.setStyle(SkPaint::Style::kFill_Style);
-    if (mStrokeStyle.type == StrokeStyleType::Color) {
-        Color color = SkiaUtils::multiplyByAlpha(mStrokeStyle.color, mGlobalAlpha);
-        paint.setColor(SkColorSetARGB(color.A, color.R, color.G, color.B));
+    if (mFillStyle.type == FillStrokeStyle::StyleType::Color) {
+        paint.setColor(SkiaUtils::multiplyByAlpha(mFillStyle.color, mGlobalAlpha));
     } else {
         // TODO
     }
@@ -126,9 +124,9 @@ SkPaint CanvasRenderingContextSkia::getFillPaint() {
 
 bool CanvasRenderingContextSkia::initShadowPaintIfNeed(SkPaint& shadow, SkPaint& base) {
     // multiply first to see if the alpha channel goes to 0 after multiplication.
-    Color alphaColor = SkiaUtils::multiplyByAlpha(mShadowColor, mGlobalAlpha);
+    SkColor alphaColor = SkiaUtils::multiplyByAlpha(mShadowColor, mGlobalAlpha);
     // if alpha is zero, no shadows
-    if (!alphaColor.A) {
+    if (!SkColorGetA(alphaColor)) {
         return false;
     }
     // one of these must also be non-zero (otherwise the shadow is
@@ -137,7 +135,7 @@ bool CanvasRenderingContextSkia::initShadowPaintIfNeed(SkPaint& shadow, SkPaint&
         return false;
     }
     shadow = base;
-    shadow.setColor(SkColorSetARGB(alphaColor.A, alphaColor.R, alphaColor.G, alphaColor.B));
+    shadow.setColor(alphaColor);
     auto blurEffect
         = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, mShadowBlur / 2, false);
     shadow.setMaskFilter(blurEffect);
@@ -150,6 +148,28 @@ void CanvasRenderingContextSkia::applyShadowOffsetMatrix() {
     mSurface->getCanvas()->concat(inverted);
     mSurface->getCanvas()->concat(SkMatrix::Translate(mShadowOffsetX, mShadowOffsetY));
     mSurface->getCanvas()->concat(mCurrentTransform);
+}
+
+void CanvasRenderingContextSkia::arc(SkScalar x, SkScalar y, SkScalar radius, SkScalar startAngle,
+                                     SkScalar endAngle, bool anticlockwise) {
+    SkPath temp;
+    SkScalar sweep = SkiaUtils::radiansToDegrees(endAngle - startAngle) - (360 * !anticlockwise);
+    SkRect bounds = SkRect::MakeLTRB(x - radius, y - radius, x + radius, y + radius);
+    temp.addArc(bounds, SkiaUtils::radiansToDegrees(startAngle), sweep);
+    mCurrentPath.addPath(temp, SkPath::kExtend_AddPathMode);
+}
+
+void CanvasRenderingContextSkia::fill() {
+    mCurrentPath.setFillType(SkPathFillType::kWinding);
+    auto fillPaint = getFillPaint();
+    SkPaint shadowPaint;
+    if (initShadowPaintIfNeed(shadowPaint, fillPaint)) {
+        mSurface->getCanvas()->save();
+        applyShadowOffsetMatrix();
+        mSurface->getCanvas()->drawPath(mCurrentPath, shadowPaint);
+        mSurface->getCanvas()->restore();
+    }
+    mSurface->getCanvas()->drawPath(mCurrentPath, fillPaint);
 }
 
 void CanvasRenderingContextSkia::stroke() {
