@@ -49,8 +49,6 @@ CanvasRenderingContextSkia::CanvasRenderingContextSkia(int width, int height)
 
 CanvasRenderingContextSkia::~CanvasRenderingContextSkia() noexcept {}
 
-void CanvasRenderingContextSkia::setLineDash(LineDash lineDash) { mLineDash = lineDash; }
-
 void CanvasRenderingContextSkia::strokeRect(SkScalar x, SkScalar y, SkScalar width,
                                             SkScalar height) {
     auto strokePaint = getStrokePaint();
@@ -104,9 +102,9 @@ SkPaint CanvasRenderingContextSkia::getStrokePaint() {
         // TODO
     }
     paint.setStrokeWidth(mStrokeWidth);
-    if (mLineDash.intervals.size() > 0) {
-        paint.setPathEffect(SkDashPathEffect::Make(&mLineDash.intervals[0],
-                                                   mLineDash.intervals.size(), mLineDash.phase));
+    if (mLineDashList.size() > 0) {
+        paint.setPathEffect(
+            SkDashPathEffect::Make(&mLineDashList[0], mLineDashList.size(), mLineDashOffset));
     }
     return paint;
 }
@@ -183,6 +181,14 @@ void CanvasRenderingContextSkia::stroke() {
     }
 
     mSurface->getCanvas()->drawPath(mCurrentPath, strokePaint);
+}
+
+void CanvasRenderingContextSkia::clearRect(SkScalar x, SkScalar y, SkScalar width,
+                                           SkScalar height) {
+    mPaint.setStyle(SkPaint::Style::kFill_Style);
+    mPaint.setBlendMode(SkBlendMode::kClear);
+    mSurface->getCanvas()->drawRect(SkRect::MakeXYWH(x, y, width, height), mPaint);
+    mPaint.setBlendMode(mGlobalCompositeOperation);
 }
 
 #if IS_WEB

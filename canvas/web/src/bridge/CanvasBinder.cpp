@@ -11,6 +11,7 @@
 #include "SkiaUtils.hpp"
 
 using namespace emscripten;
+using WASMPointerF32 = uintptr_t;
 
 std::shared_ptr<Canvas> makeCanvas(int width, int height) {
     return std::make_shared<Canvas>(width, height);
@@ -43,6 +44,19 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
     class_<CanvasRenderingContextSkia>("CanvasRenderingContext2D")
         .smart_ptr<std::shared_ptr<CanvasRenderingContextSkia>>(
             "std::shared_ptr<CanvasRenderingContext2D>")
+        .function("setLineDash", optional_override([](CanvasRenderingContextSkia& self,
+                                                      WASMPointerF32 cptr, int count) -> void {
+                      const float* intervals = reinterpret_cast<const float*>(cptr);
+                      std::vector<SkScalar> result;
+                      for (int i = 0; i < count; i++) {
+                          result.push_back(intervals[i]);
+                      }
+                      self.setLineDash(result);
+                  }))
+        .function("setLineDashOffset",
+                  optional_override([](CanvasRenderingContextSkia& self, float offset) -> void {
+                      self.setLineDashOffset(offset);
+                  }))
         .function("setLineCap",
                   optional_override([](CanvasRenderingContextSkia& self, std::string cap) -> void {
                       self.setLineCap(cap);
@@ -118,7 +132,13 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
         .function("lineTo", optional_override([](CanvasRenderingContextSkia& self, float x,
                                                  float y) -> void { self.lineTo(x, y); }))
         .function("stroke", optional_override(
-                                [](CanvasRenderingContextSkia& self) -> void { self.stroke(); }));
+                                [](CanvasRenderingContextSkia& self) -> void { self.stroke(); }))
+        .function("clearRect", optional_override([](CanvasRenderingContextSkia& self, float x,
+                                                    float y, float width, float height) -> void {
+                      self.clearRect(x, y, width, height);
+                  }))
+        .function("flush", optional_override(
+                               [](CanvasRenderingContextSkia& self) -> void { self.flush(); }));
 
     class_<Canvas>("Canvas")
         .smart_ptr<std::shared_ptr<Canvas>>("std::shared_ptr<Canvas>")

@@ -23,9 +23,4 @@ struct FillStrokeStyle {
     SkColor color = SK_ColorBLACK;
 };
 
-struct LineDash {
-    std::vector<SkScalar> intervals;
-    SkScalar phase = 0;
-};
-
 #endif  // INFINITEENGINE_SKIAMODELS_HPP

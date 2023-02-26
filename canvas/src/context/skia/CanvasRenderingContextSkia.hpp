@@ -37,6 +37,8 @@ public:
         }
     }
 
+    void setLineDashOffset(SkScalar value) { mLineDashOffset = value; }
+
     void setStrokeStyle(FillStrokeStyle style) { mStrokeStyle = style; }
 
     void setFillStyle(FillStrokeStyle style) { mFillStyle = style; }
@@ -53,7 +55,12 @@ public:
         }
     }
 
-    void setLineDash(LineDash lineDash);
+    void setLineDash(std::vector<SkScalar> lineDash) {
+        mLineDashList = lineDash;
+        if (mLineDashList.size() % 2 == 1) {
+            mLineDashList.insert(mLineDashList.end(), mLineDashList.begin(), mLineDashList.end());
+        }
+    }
 
     void setGlobalAlpha(SkScalar alpha) {
         if (alpha < 0 || alpha > 1) {
@@ -99,6 +106,10 @@ public:
 
     void fillText(std::string text, SkScalar x, SkScalar y, SkScalar maxWidth = 0);
 
+    void clearRect(SkScalar x, SkScalar y, SkScalar width, SkScalar height);
+
+    void flush() { mSurface->flushAndSubmit(); }
+
 private:
     void makeSurfaceByPlatform();
 
@@ -118,7 +129,8 @@ private:
 
     FillStrokeStyle mStrokeStyle;
     FillStrokeStyle mFillStyle;
-    LineDash mLineDash;
+    SkScalar mLineDashOffset = 0;
+    std::vector<SkScalar> mLineDashList;
     SkScalar mStrokeWidth = 1;
 
     SkPath mCurrentPath;

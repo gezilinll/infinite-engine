@@ -46,5 +46,6 @@ CanvasLoader.init().then(async () => {
   startY += lineHeight;
   context2D.fillText("---------- iOS TBD ----------", startX, startY += lineHeight);
 
+  context2D.flush();
   canvas.delete();
 });

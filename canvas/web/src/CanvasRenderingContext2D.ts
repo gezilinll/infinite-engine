@@ -1,3 +1,5 @@
+import { CanvasLoader } from "./CanvasLoader";
+
 export class CanvasRenderingContext2D {
     private _nativeContext: any = undefined;
 
@@ -61,6 +63,17 @@ export class CanvasRenderingContext2D {
         this._nativeContext?.setLineCap(cap);
     }
 
+    set lineDashOffset(value: number) {
+        this._nativeContext?.setLineDashOffset(value);
+    }
+
+    setLineDash(segments: number[]) {
+        var ptr = CanvasLoader.module._malloc(segments.length * CanvasLoader.module['HEAPF32'].BYTES_PER_ELEMENT);
+        CanvasLoader.module.HEAPF32.set(segments, ptr / CanvasLoader.module['HEAPF32'].BYTES_PER_ELEMENT);
+        this._nativeContext?.setLineDash(ptr, segments.length);
+        CanvasLoader.module._free(ptr);
+    }
+
     set globalCompositeOperation(operation: string) {
         this._nativeContext?.setGlobalCompositeOperation(operation);
     }
@@ -108,5 +121,13 @@ export class CanvasRenderingContext2D {
 
     stroke() {
         this._nativeContext?.stroke();
+    }
+
+    clearRect(x: number, y: number, width: number, height: number) {
+        this._nativeContext?.clearRect(x, y, width, height);
+    }
+
+    flush() {
+        this._nativeContext?.flush();
     }
 }

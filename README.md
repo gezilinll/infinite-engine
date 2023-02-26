@@ -27,8 +27,10 @@ import { CanvasLoader, Canvas } from "ez-infinite-canvas/infinite-canvas.es";
 // 等待 WASM 初始化完成后即可正常使
 CanvasLoader.init().then(async () => {
 	let canvas = new Canvas("canvaID");
-  let context2D = canvas.getContext("2d");
+  let ctx = canvas.getContext("2d");
   ...
+  ctx.flush(); // 将渲染结果上屏
+  canvas.delete(); // 不再使用时回收资源
 });
 ```
 
@@ -81,6 +83,7 @@ CanvasLoader.init().then(async () => {
 | globalCompositeOperation | :white_check_mark:     |         |      |         |      |       |
 | imageSmoothingEnabled    |                        |         |      |         |      |       |
 | lineCap                  | :white_check_mark:     |         |      |         |      |       |
+| lineDashOffset           | :white_check_mark:     |         |      |         |      |       |
 | shadowBlur               | :white_check_mark:     |         |      |         |      |       |
 | shadowColor              | :white_check_mark:     |         |      |         |      |       |
 | shadowOffsetX            | :white_check_mark:     |         |      |         |      |       |
