@@ -70,23 +70,24 @@ CanvasLoader.init().then(async () => {
 
 ### 实例属性
 
-| API             | Web                    | Android | iOS  | Windows | Mac  | Linux |
-| --------------- | ---------------------- | ------- | ---- | ------- | ---- | ----- |
-| direction       |                        |         |      |         |      |       |
-| fillStyle       | :ok:（仅支持颜色类型） |         |      |         |      |       |
-| filter          |                        |         |      |         |      |       |
-| font            |                        |         |      |         |      |       |
-| fontKerning     |                        |         |      |         |      |       |
-| fontStretch     |                        |         |      |         |      |       |
-| fontVariantCaps |                        |         |      |         |      |       |
-| globalAlpha     | :white_check_mark:     |         |      |         |      |       |
-| shadowBlur      | :white_check_mark:     |         |      |         |      |       |
-| shadowColor     | :white_check_mark:     |         |      |         |      |       |
-| shadowOffsetX   | :white_check_mark:     |         |      |         |      |       |
-| shadowOffsetY   | :white_check_mark:     |         |      |         |      |       |
-| strokeStyle     | :ok:（仅支持颜色类型） |         |      |         |      |       |
-| font            |                        |         |      |         |      |       |
-| ...             |                        |         |      |         |      |       |
+| API                      | Web                    | Android | iOS  | Windows | Mac  | Linux |
+| ------------------------ | ---------------------- | ------- | ---- | ------- | ---- | ----- |
+| direction                |                        |         |      |         |      |       |
+| fillStyle                | :ok:（仅支持颜色类型） |         |      |         |      |       |
+| filter                   |                        |         |      |         |      |       |
+| font                     |                        |         |      |         |      |       |
+| fontKerning              |                        |         |      |         |      |       |
+| globalAlpha              | :white_check_mark:     |         |      |         |      |       |
+| globalCompositeOperation | :white_check_mark:     |         |      |         |      |       |
+| imageSmoothingEnabled    |                        |         |      |         |      |       |
+| lineCap                  | :white_check_mark:     |         |      |         |      |       |
+| shadowBlur               | :white_check_mark:     |         |      |         |      |       |
+| shadowColor              | :white_check_mark:     |         |      |         |      |       |
+| shadowOffsetX            | :white_check_mark:     |         |      |         |      |       |
+| shadowOffsetY            | :white_check_mark:     |         |      |         |      |       |
+| strokeStyle              | :ok:（仅支持颜色类型） |         |      |         |      |       |
+| font                     |                        |         |      |         |      |       |
+| ...                      |                        |         |      |         |      |       |
 
 ### 实例方法
 

@@ -57,6 +57,10 @@ export class CanvasRenderingContext2D {
         this._nativeContext?.setGlobalAlpha(alpha);
     }
 
+    set lineCap(cap: string) {
+        this._nativeContext?.setLineCap(cap);
+    }
+
     set globalCompositeOperation(operation: string) {
         this._nativeContext?.setGlobalCompositeOperation(operation);
     }

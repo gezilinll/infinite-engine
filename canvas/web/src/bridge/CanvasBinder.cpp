@@ -43,6 +43,10 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
     class_<CanvasRenderingContextSkia>("CanvasRenderingContext2D")
         .smart_ptr<std::shared_ptr<CanvasRenderingContextSkia>>(
             "std::shared_ptr<CanvasRenderingContext2D>")
+        .function("setLineCap",
+                  optional_override([](CanvasRenderingContextSkia& self, std::string cap) -> void {
+                      self.setLineCap(cap);
+                  }))
         .function("setLineWidth",
                   optional_override([](CanvasRenderingContextSkia& self, float width) -> void {
                       self.setLineWidth(width);

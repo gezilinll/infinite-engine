@@ -27,6 +27,16 @@ public:
         }
     }
 
+    void setLineCap(std::string cap) {
+        if (cap == "butt") {
+            mPaint.setStrokeCap(SkPaint::Cap::kButt_Cap);
+        } else if (cap == "round") {
+            mPaint.setStrokeCap(SkPaint::Cap::kRound_Cap);
+        } else if (cap == "square") {
+            mPaint.setStrokeCap(SkPaint::Cap::kSquare_Cap);
+        }
+    }
+
     void setStrokeStyle(FillStrokeStyle style) { mStrokeStyle = style; }
 
     void setFillStyle(FillStrokeStyle style) { mFillStyle = style; }
@@ -56,6 +66,7 @@ public:
         try {
             auto result = SkiaUtils::parseBlendModeString(operation);
             mGlobalCompositeOperation = result;
+            mPaint.setBlendMode(mGlobalCompositeOperation);
         } catch (const char* msg) {
         }
     }
