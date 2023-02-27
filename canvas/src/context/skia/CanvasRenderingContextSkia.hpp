@@ -37,6 +37,12 @@ public:
         }
     }
 
+    void setMiterLimit(SkScalar value) {
+        if (value > 0) {
+            mPaint.setStrokeMiter(value);
+        }
+    }
+
     void setLineJoin(std::string join) {
         if (join == "miter") {
             mPaint.setStrokeJoin(SkPaint::Join::kMiter_Join);

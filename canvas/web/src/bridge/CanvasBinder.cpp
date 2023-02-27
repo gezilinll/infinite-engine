@@ -69,6 +69,10 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
                   optional_override([](CanvasRenderingContextSkia& self, float width) -> void {
                       self.setLineWidth(width);
                   }))
+        .function("setMiterLimit",
+                  optional_override([](CanvasRenderingContextSkia& self, float value) -> void {
+                      self.setMiterLimit(value);
+                  }))
         .function("setShadowOffsetX",
                   optional_override([](CanvasRenderingContextSkia& self, float value) -> void {
                       self.setShadowOffsetX(value);

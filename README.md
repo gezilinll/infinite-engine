@@ -84,13 +84,18 @@ CanvasLoader.init().then(async () => {
 | imageSmoothingEnabled    |                        |         |      |         |      |       |
 | lineCap                  | :white_check_mark:     |         |      |         |      |       |
 | lineDashOffset           | :white_check_mark:     |         |      |         |      |       |
-| lineJoin                 |                        |         |      |         |      |       |
+| lineJoin                 | :white_check_mark:     |         |      |         |      |       |
+| lineWidth                | :white_check_mark:     |         |      |         |      |       |
+| miterLimit               | :white_check_mark:     |         |      |         |      |       |
 | shadowBlur               | :white_check_mark:     |         |      |         |      |       |
 | shadowColor              | :white_check_mark:     |         |      |         |      |       |
 | shadowOffsetX            | :white_check_mark:     |         |      |         |      |       |
 | shadowOffsetY            | :white_check_mark:     |         |      |         |      |       |
 | strokeStyle              | :ok:（仅支持颜色类型） |         |      |         |      |       |
-| font                     |                        |         |      |         |      |       |
+| textAlign                |                        |         |      |         |      |       |
+| textBaseline             |                        |         |      |         |      |       |
+| textRendering            |                        |         |      |         |      |       |
+| wordSpacing              |                        |         |      |         |      |       |
 | ...                      |                        |         |      |         |      |       |
 
 ### 实例方法
