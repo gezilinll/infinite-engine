@@ -129,6 +129,9 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
                                                  float y) -> void { self.moveTo(x, y); }))
         .function("lineTo", optional_override([](CanvasRenderingContextSkia& self, float x,
                                                  float y) -> void { self.lineTo(x, y); }))
+        .function("rect",
+                  optional_override([](CanvasRenderingContextSkia& self, float x, float y, float w,
+                                       float h) -> void { self.rect(x, y, w, h); }))
         .function("stroke", optional_override(
                                 [](CanvasRenderingContextSkia& self) -> void { self.stroke(); }))
         .function("clearRect", optional_override([](CanvasRenderingContextSkia& self, float x,

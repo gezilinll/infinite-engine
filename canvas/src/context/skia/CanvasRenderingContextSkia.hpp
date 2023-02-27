@@ -124,6 +124,10 @@ public:
 
     void lineTo(SkScalar x, SkScalar y) { mCurrentPath.lineTo(x, y); }
 
+    void rect(SkScalar x, SkScalar y, SkScalar width, SkScalar height) {
+        mCurrentPath.addRect(SkRect::MakeXYWH(x, y, width, height));
+    }
+
     void closePath() { mCurrentPath.close(); }
 
     void stroke();

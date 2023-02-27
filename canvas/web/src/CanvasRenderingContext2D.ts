@@ -138,6 +138,10 @@ export class CanvasRenderingContext2D {
         this._nativeContext?.lineTo(x, y);
     }
 
+    rect(x: number, y: number, width: number, height: number) {
+        this._nativeContext?.rect(x, y, width, height);
+    }
+
     stroke() {
         this._nativeContext?.stroke();
     }
