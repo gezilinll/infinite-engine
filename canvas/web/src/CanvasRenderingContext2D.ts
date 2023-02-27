@@ -118,6 +118,10 @@ export class CanvasRenderingContext2D {
         this._nativeContext?.fillText(text, x, y, 0);
     }
 
+    strokeText(text: string, x: number, y: number, maxWidth?: number) {
+        this._nativeContext?.strokeText(text, x, y, 0);
+    }
+
     beginPath() {
         this._nativeContext?.beginPath();
     }

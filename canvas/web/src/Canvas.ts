@@ -46,7 +46,8 @@ export class Canvas {
         var ptr = CanvasLoader.module._malloc(data.byteLength);
         CanvasLoader.module.HEAPU8.set(data, ptr);
         this._nativeCanvas?.loadFont(ptr, data.byteLength, descriptor.family, descriptor.style, descriptor.weight);
-        CanvasLoader.module._free(ptr);
+        // We do not need to free the data since the C++ will do that for us
+        // when the font is deleted (or fails to decode);
     }
 
     private _getWebGLContext(canvas: HTMLCanvasElement | OffscreenCanvas): WebGLContextHandle {

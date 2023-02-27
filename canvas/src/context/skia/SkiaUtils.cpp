@@ -118,7 +118,7 @@ FontInfo SkiaUtils::parseFontString(std::string fontStr) {
     } else if (unit == "pt") {
         sizePx = size * 4 / 3;
     } else if (unit == "px") {
-        size = size;
+        sizePx = size;
     } else if (unit == "pc") {
         sizePx = size * defaultHeight;
     } else if (unit == "in") {
@@ -140,7 +140,8 @@ FontInfo SkiaUtils::parseFontString(std::string fontStr) {
     result.family = cm[6];
     result.family.erase(remove(result.family.begin(), result.family.end(), ' '),
                         result.family.end());
-
+    printf("fontInfo { family:%s style:%s weight:%s sizePx:%d variant:%s }\n", result.family.data(),
+           result.style.data(), result.weight.data(), sizePx, result.variant.data());
     return result;
 }
 

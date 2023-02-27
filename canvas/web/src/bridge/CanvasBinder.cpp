@@ -115,6 +115,10 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
                   optional_override(
                       [](CanvasRenderingContextSkia& self, std::string text, float x, float y,
                          float maxWidth) -> void { self.fillText(text, x, y, maxWidth); }))
+        .function("strokeText",
+                  optional_override(
+                      [](CanvasRenderingContextSkia& self, std::string text, float x, float y,
+                         float maxWidth) -> void { self.strokeText(text, x, y, maxWidth); }))
         .function("beginPath", optional_override([](CanvasRenderingContextSkia& self) -> void {
                       self.beginPath();
                   }))

@@ -97,6 +97,21 @@ void CanvasRenderingContextSkia::fillText(std::string text, SkScalar x, SkScalar
     mSurface->getCanvas()->drawTextBlob(blob, x, y, fillPaint);
 }
 
+void CanvasRenderingContextSkia::strokeText(std::string text, SkScalar x, SkScalar y,
+                                            SkScalar maxWidth) {
+    // TODO do something with maxWidth, probably involving measure
+    auto strokePaint = getStrokePaint();
+    auto blob = SkTextBlob::MakeFromString(text.data(), mFont, SkTextEncoding::kUTF8);
+    SkPaint shadowPaint;
+    if (initShadowPaintIfNeed(shadowPaint, strokePaint)) {
+        mSurface->getCanvas()->save();
+        applyShadowOffsetMatrix();
+        mSurface->getCanvas()->drawTextBlob(blob, x, y, shadowPaint);
+        mSurface->getCanvas()->restore();
+    }
+    mSurface->getCanvas()->drawTextBlob(blob, x, y, strokePaint);
+}
+
 SkPaint CanvasRenderingContextSkia::getStrokePaint() {
     SkPaint paint = mPaint;
     paint.setStyle(SkPaint::Style::kStroke_Style);

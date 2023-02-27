@@ -103,6 +103,8 @@ public:
             if (typeFace) {
                 mFont.setSize(fontInfo.sizePx);
                 mFont.setTypeface(typeFace);
+            } else {
+                printf("can not find target font: %s\n", fontStr.data());
             }
         } catch (std::string msg) {
             printf("setFont failed. %s\n", msg.data());
@@ -129,6 +131,8 @@ public:
     void fill();
 
     void fillText(std::string text, SkScalar x, SkScalar y, SkScalar maxWidth = 0);
+
+    void strokeText(std::string text, SkScalar x, SkScalar y, SkScalar maxWidth = 0);
 
     void clearRect(SkScalar x, SkScalar y, SkScalar width, SkScalar height);
 
