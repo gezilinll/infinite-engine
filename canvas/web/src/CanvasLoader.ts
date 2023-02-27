@@ -19,7 +19,7 @@ export class CanvasLoader {
                 locateFile: (path: string) => {
                     return CanvasLoader.wasmPath;
                 },
-            }).then((module: Module) => {
+            }).then((module: typeof Module) => {
                 return module;
             }).catch((err: any) => {
                 console.error(err);

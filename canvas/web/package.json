@@ -2,7 +2,9 @@
   "name": "ez-infinite-canvas",
   "version": "0.0.1",
   "description": "",
-  "main": "./src/index.d.ts",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/infinite-canvas.es.js",
@@ -10,9 +12,11 @@
     }
   },
   "scripts": {
-    "build:ts": "npx tsc -p tsconfig.json",
-    "build:lib": "rm -rf dist && npx vite build --config vite.config.lib.js && npx tsc -p tsconfig.json && cp package.lib.json dist/package.json",
-    "build:page": "rm -rf dist && npx vite build --config vite.config.page.js && tsc -p tsconfig.json && mv dist/assets dist/demo",
+    "build:cjs": "tsc --module commonjs --target es5 --outDir dist/cjs",
+    "build:esm": "tsc --module es2015 --target es5 --outDir dist/esm",
+    "build:ts": "rm -rf ./dist && npm run build:cjs && npm run build:esm",
+    "build:lib": "rm -rf dist && vite build --config vite.config.lib.js && tsc -p tsconfig.json && cp package.lib.json dist/package.json",
+    "build:page": "rm -rf dist && vite build --config vite.config.page.js && tsc -p tsconfig.json && mv dist/assets dist/demo",
     "dev": "NODE_OPTIONS=--max_old_space_size=2048 vite"
   },
   "author": "gezilinll",
