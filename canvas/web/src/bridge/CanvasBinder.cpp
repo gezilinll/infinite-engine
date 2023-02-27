@@ -12,30 +12,13 @@
 
 using namespace emscripten;
 using WASMPointerF32 = uintptr_t;
+using WASMPointerU8 = uintptr_t;
 
 std::shared_ptr<Canvas> makeCanvas(int width, int height) {
     return std::make_shared<Canvas>(width, height);
 }
 
-void DrawSomething() {
-    emscripten_glClearColor(0, 0, 0, 0);
-
-    // auto canvas = surface->getCanvas();
-    // canvas->clear(SK_ColorBLACK);
-    // auto paint = SkPaint();
-    // paint.setColor(SkColorSetARGB(139, 228, 135, 255)); // greenish
-    // paint.setStyle(SkPaint::Style::kFill_Style);
-    // paint.setAntiAlias(true);
-    // canvas->drawOval(SkRect::MakeXYWH(100, 100, 800, 800), paint);
-    // // for (int i = 0; i < 10; i++)
-    // // {
-    // //     auto x = std::rand() * 50;
-    // //     auto y = std::rand() * 50;
-    // //     canvas->drawOval(SkRect::MakeXYWH(x, y, 6, 6), paint);
-    // // }
-    // surface->flushAndSubmit();
-    // printf("----- DrawSomething END -----\n");
-}
+void DrawSomething() { emscripten_glClearColor(0, 0, 0, 0); }
 
 EMSCRIPTEN_BINDINGS(CanvasBinder) {
     function("makeCanvas", select_overload<std::shared_ptr<Canvas>(int, int)>(&makeCanvas));
@@ -112,6 +95,9 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
             optional_override([](CanvasRenderingContextSkia& self, std::string value) -> void {
                 self.setGlobalCompositeOperation(value);
             }))
+        .function("setFont",
+                  optional_override([](CanvasRenderingContextSkia& self,
+                                       std::string value) -> void { self.setFont(value); }))
         .function("arc", optional_override([](CanvasRenderingContextSkia& self, float x, float y,
                                               float radius, float startAngle, float endAngle,
                                               bool anticlockwise) -> void {
@@ -155,7 +141,17 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
             optional_override([](Canvas& self) -> std::shared_ptr<CanvasRenderingContextSkia> {
                 auto baseContext = self.getContext("2d");
                 return std::dynamic_pointer_cast<CanvasRenderingContextSkia>(baseContext);
-            }));
+            }))
+        .function("loadFont", optional_override([](Canvas& self, WASMPointerU8 fPtr, int byteLength,
+                                                   std::string family, std::string style,
+                                                   std::string weight) -> void {
+                      uint8_t* font = reinterpret_cast<uint8_t*>(fPtr);
+                      FontInfo info;
+                      info.family = family;
+                      info.style = style;
+                      info.weight = weight;
+                      self.loadFont(font, byteLength, info);
+                  }));
 }
 
 #endif  // INFINITE_CANVAS_BINNDER

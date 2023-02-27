@@ -1,5 +1,6 @@
 import { CanvasLoader } from "./CanvasLoader";
 import { CanvasRenderingContext2D } from "./CanvasRenderingContext2D";
+import { FontInfo } from "./FontInfo";
 
 type WebGLContextHandle = number;
 
@@ -38,6 +39,14 @@ export class Canvas {
             this._context2D = new CanvasRenderingContext2D(this._nativeCanvas.get2DContext());
         }
         return this._context2D;
+    }
+
+    loadFont(fontBuffer: ArrayBuffer, descriptor: FontInfo) {
+        var data = new Uint8Array(fontBuffer);
+        var ptr = CanvasLoader.module._malloc(data.byteLength);
+        CanvasLoader.module.HEAPU8.set(data, ptr);
+        this._nativeCanvas?.loadFont(ptr, data.byteLength, descriptor.family, descriptor.style, descriptor.weight);
+        CanvasLoader.module._free(ptr);
     }
 
     private _getWebGLContext(canvas: HTMLCanvasElement | OffscreenCanvas): WebGLContextHandle {

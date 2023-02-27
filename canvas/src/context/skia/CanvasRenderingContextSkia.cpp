@@ -30,8 +30,12 @@ struct ColorSettings {
     GrGLenum pixFormat;
 };
 
-CanvasRenderingContextSkia::CanvasRenderingContextSkia(int width, int height)
-    : CanvasRenderingContextBase(), mCanvasWidth(width), mCanvasHeight(height) {
+CanvasRenderingContextSkia::CanvasRenderingContextSkia(int width, int height,
+                                                       std::shared_ptr<FontManager> fontManager)
+    : CanvasRenderingContextBase(),
+      mCanvasWidth(width),
+      mCanvasHeight(height),
+      mFontManager(fontManager) {
     mPaint.setAntiAlias(true);
     mPaint.setStrokeMiter(10);
     mPaint.setStrokeCap(SkPaint::Cap::kButt_Cap);

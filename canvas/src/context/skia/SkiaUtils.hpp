@@ -7,6 +7,7 @@
 #include <math.h>
 #include <string>
 #include <unordered_map>
+#include "Models.hpp"
 #include "SkiaModels.hpp"
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkColor.h"
@@ -20,7 +21,7 @@ public:
 
     static SkBlendMode parseBlendModeString(std::string blendModeStr);
 
-    static Font parseFontString(std::string fontStr);
+    static FontInfo parseFontString(std::string fontStr);
 
     static SkScalar radiansToDegrees(SkScalar radians) { return (radians / PI) * 180; }
 

@@ -89,25 +89,26 @@ SkBlendMode SkiaUtils::parseBlendModeString(std::string blendModeStr) {
     }
     auto it = sBlendModeMap.find(blendModeStr);
     if (it == sBlendModeMap.end()) {
-        throw blendModeStr + " is not supported";
+        throw std::string(blendModeStr + " is not supported");
     }
     return it->second;
 }
 
-Font SkiaUtils::parseFontString(std::string fontStr) {
-    static std::regex regex(
-        reinterpret_cast<const char*>('(italic|oblique|normal|)\\s*' +               // style
-                                      '(small-caps|normal|)\\s*' +                   // variant
-                                      '(bold|bolder|lighter|[1-9]00|normal|)\\s*' +  // weight
-                                      '([\\d\\.]+)' +                                // size
-                                      "(px|pt|pc|in|cm|mm|%|em|ex|ch|rem|q)" +       // unit
-                                      // line-height is ignored here, as per the spec
-                                      '(.+)'));  // family
+FontInfo SkiaUtils::parseFontString(std::string fontStr) {
+    static std::string regexStr
+        = std::string("(italic|oblique|normal|)\\s*")    // style
+          + "(small-caps|normal|)\\s*"                   // variant
+          + "(bold|bolder|lighter|[1-9]00|normal|)\\s*"  // weight
+          + "([\\d\\.]+)"                                // size
+          + "(px|pt|pc|in|cm|mm|%|em|ex|ch|rem|q)"       // unit
+                                                    // line-height is ignored here, as per the spec
+          + "(.+)";  // family
+    static std::regex regex(regexStr);
     static int defaultHeight = 16;
     std::cmatch cm;
     std::regex_match(fontStr.data(), cm, regex);
     if (cm.empty()) {
-        throw "Invalid font string " + fontStr;
+        throw std::string("Invalid font string " + fontStr);
     }
     float size = std::stof(cm[4]);
     int sizePx = defaultHeight;
@@ -131,7 +132,7 @@ Font SkiaUtils::parseFontString(std::string fontStr) {
     } else if (unit == "%") {
         sizePx = size * (defaultHeight / 75);
     }
-    Font result;
+    FontInfo result;
     result.style = cm[1];
     result.variant = cm[2];
     result.weight = cm[3];

@@ -6,6 +6,7 @@
 #define INFINITEENGINE_CANVASRENDERINGCONTEXTSKIA_HPP
 
 #include "CanvasRenderingContextBase.hpp"
+#include "FontManager.hpp"
 #include "Macros.hpp"
 #include "SkiaModels.hpp"
 #include "SkiaUtils.hpp"
@@ -17,7 +18,7 @@
 
 class CanvasRenderingContextSkia : public CanvasRenderingContextBase {
 public:
-    CanvasRenderingContextSkia(int width, int height);
+    CanvasRenderingContextSkia(int width, int height, std::shared_ptr<FontManager> fontManager);
 
     ~CanvasRenderingContextSkia() noexcept;
 
@@ -90,14 +91,21 @@ public:
             auto result = SkiaUtils::parseBlendModeString(operation);
             mGlobalCompositeOperation = result;
             mPaint.setBlendMode(mGlobalCompositeOperation);
-        } catch (const char* msg) {
+        } catch (std::string msg) {
+            printf("setGlobalCompositeOperation failed. %s\n", msg.data());
         }
     }
 
     void setFont(std::string fontStr) {
         try {
-            auto result = SkiaUtils::parseFontString(fontStr);
-        } catch (const char* msg) {
+            auto fontInfo = SkiaUtils::parseFontString(fontStr);
+            auto typeFace = mFontManager->getTypeFaceFromCache(fontInfo);
+            if (typeFace) {
+                mFont.setSize(fontInfo.sizePx);
+                mFont.setTypeface(typeFace);
+            }
+        } catch (std::string msg) {
+            printf("setFont failed. %s\n", msg.data());
         }
     }
 
@@ -151,13 +159,13 @@ private:
 
     SkPath mCurrentPath;
     SkMatrix mCurrentTransform;
-
     SkColor mShadowColor = SK_ColorTRANSPARENT;
     SkScalar mShadowOffsetX = 0;
     SkScalar mShadowOffsetY = 0;
     SkScalar mShadowBlur = 0;
 
     SkFont mFont;
+    std::shared_ptr<FontManager> mFontManager;
 
     SkPaint mPaint;
     sk_sp<GrDirectContext> mContext;

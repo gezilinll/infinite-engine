@@ -8,13 +8,6 @@
 #include <vector>
 #include "include/core/SkColor.h"
 #include "include/core/SkScalar.h"
-struct Font {
-    std::string style;
-    std::string variant;
-    std::string weight;
-    int sizePx = 0;
-    std::string family;
-};
 
 struct FillStrokeStyle {
     enum class StyleType { Color };

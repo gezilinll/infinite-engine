@@ -78,6 +78,10 @@ export class CanvasRenderingContext2D {
         this._nativeContext?.setMiterLimit(value);
     }
 
+    set font(value: string) {
+        this._nativeContext?.setFont(value);
+    }
+
     setLineDash(segments: number[]) {
         var ptr = CanvasLoader.module._malloc(segments.length * CanvasLoader.module['HEAPF32'].BYTES_PER_ELEMENT);
         CanvasLoader.module.HEAPF32.set(segments, ptr / CanvasLoader.module['HEAPF32'].BYTES_PER_ELEMENT);
