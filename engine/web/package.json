@@ -1,0 +1,35 @@
+{
+  "name": "ez-infinite-engine",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/infinite-engine.es.js",
+      "require": "./dist/infinite-engine.umd.js"
+    }
+  },
+  "scripts": {
+    "build:cjs": "tsc --module commonjs --target es5 --outDir dist/cjs",
+    "build:esm": "tsc --module es2015 --target es5 --outDir dist/esm",
+    "build:ts": "rm -rf ./dist && npm run build:cjs && npm run build:esm",
+    "build:lib": "rm -rf dist && vite build --config vite.config.lib.js && tsc -p tsconfig.json && cp package.lib.json dist/package.json",
+    "build:page": "rm -rf dist && vite build --config vite.config.page.js && tsc -p tsconfig.json && mv dist/assets dist/demo",
+    "dev": "NODE_OPTIONS=--max_old_space_size=2048 vite"
+  },
+  "author": "gezilinll",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^18.11.8",
+    "leancloud-storage": "^4.9.0",
+    "tslint": "^6.1.3",
+    "typescript": "^4.8.4",
+    "url-join": "^4.0.1",
+    "vite-plugin-top-level-await": "^1.2.4"
+  },
+  "dependencies": {
+    "vite": "^4.1.1"
+  }
+}

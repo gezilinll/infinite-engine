@@ -18,3 +18,10 @@ Canvas/web/dist/*
 Canvas/.idea/*
 Canvas/.vscode/*
 Cmake-build-debug/*
+
+Engine/.idea/*
+Engine/.vscode/*
+Engine/Cmake-build-debug/*
+Engine/Web/build-wasm
+Engine/web/node_modules/*
+Engine/web/dist/*
