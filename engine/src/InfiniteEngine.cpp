@@ -14,3 +14,12 @@ InfiniteEngine::~InfiniteEngine() {}
 void InfiniteEngine::loadFont(const void* data, size_t length, const FontInfo& info) {
     mCanvas->loadFont(data, length, info);
 }
+
+void InfiniteEngine::addElement(std::shared_ptr<Element> element) { mElements.push_back(element); }
+
+void InfiniteEngine::requestRenderFrame() {
+    for (auto element : mElements) {
+        element->requestRender(mContext);
+    }
+    mContext->flush();
+}

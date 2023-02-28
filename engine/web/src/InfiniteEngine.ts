@@ -1,3 +1,5 @@
+import { Element } from "./element/Element";
+import { ImageElement } from "./element/ImageElement";
 import { InfiniteLoader } from "./InfiniteLoader";
 
 type WebGLContextHandle = number;
@@ -23,10 +25,17 @@ export class InfiniteEngine {
             throw 'failed to create webgl context: err ' + ctx;
         }
         this._nativeEngine = InfiniteLoader.module.makeEngine(this._userCanvas!.width, this._userCanvas!.height);
+        requestAnimationFrame(this._requestRenderFrame.bind(this));
     }
 
     delete() {
 
+    }
+
+    addElement(element: Element) {
+        if (element instanceof ImageElement) {
+            this._nativeEngine?.addImageElement(element.getNativeElement());
+        }
     }
 
     private _getWebGLContext(canvas: HTMLCanvasElement | OffscreenCanvas): WebGLContextHandle {
@@ -52,5 +61,10 @@ export class InfiniteEngine {
         // Emscripten does not enable this by default and Skia needs this to handle certain GPU corner cases.
         InfiniteLoader.module.GL.currentContext.GLctx.getExtension('WEBGL_debug_renderer_info');
         return handle;
+    }
+
+    private _requestRenderFrame() {
+        this._nativeEngine?.requestRenderFrame();
+        requestAnimationFrame(this._requestRenderFrame.bind(this));
     }
 }

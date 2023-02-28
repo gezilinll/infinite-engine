@@ -38,6 +38,7 @@ echo "============================================="
   -s USE_ES6_IMPORT_META=0 \
   -I ../src/bridge/ \
   -I ../../src/ \
+  -I ../../src/element \
   -I ../../../canvas/src/ \
   -I ../../../canvas/src/context \
   -I ../../../canvas/src/context/skia \
@@ -47,6 +48,7 @@ echo "============================================="
   -std=c++17 \
   ../src/bridge/*.cpp \
   ../../src/*.cpp \
+  ../../src/element/*.cpp \
   ../../../canvas/src/*.cpp \
   ../../../canvas/src/context/skia/*.cpp \
   ../../../canvas/web/build_wasm_script/NotoMono-Regular.ttf.cpp \

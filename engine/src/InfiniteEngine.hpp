@@ -7,8 +7,9 @@
 
 #include <memory>
 #include "Canvas.hpp"
-#include "Models.hpp"
 #include "CanvasRenderingContextSkia.hpp"
+#include "Models.hpp"
+#include "Element.hpp"
 
 class InfiniteEngine {
 public:
@@ -18,7 +19,12 @@ public:
 
     void loadFont(const void* data, size_t length, const FontInfo& info);
 
+    void addElement(std::shared_ptr<Element> element);
+
+    void requestRenderFrame();
+
 private:
+    std::vector<std::shared_ptr<Element>> mElements;
     std::shared_ptr<Canvas> mCanvas;
     std::shared_ptr<CanvasRenderingContextSkia> mContext;
 };
