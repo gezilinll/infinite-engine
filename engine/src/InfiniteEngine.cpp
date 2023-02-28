@@ -6,6 +6,7 @@
 
 InfiniteEngine::InfiniteEngine(int width, int height) {
     mCanvas = std::make_shared<Canvas>(width, height);
+    mContext = std::dynamic_pointer_cast<CanvasRenderingContextSkia>(mCanvas->getContext("2d"));
 }
 
 InfiniteEngine::~InfiniteEngine() {}

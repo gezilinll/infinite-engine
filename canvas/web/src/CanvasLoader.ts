@@ -11,13 +11,21 @@ export interface EmbindObject<T extends EmbindObject<T>> {
 
 export class CanvasLoader {
     public static module: any = undefined;
-    public static wasmPath = "http://rqm1nmwwk.hn-bkt.clouddn.com/InfiniteCanvas.wasm";
+    private static releaseMode: boolean = true;
+    private static _wasmPath = "http://rqm1nmwwk.hn-bkt.clouddn.com/InfiniteCanvas.wasm";
+
+    public static set wasmPath(path: string) {
+        if (!CanvasLoader.releaseMode) {
+            this._wasmPath = path;
+        }
+    }
 
     public static async init() {
+        console.log(this.module);
         return new Promise(async (resolve, reject) => {
             const instance = await Module({
                 locateFile: (path: string) => {
-                    return CanvasLoader.wasmPath;
+                    return CanvasLoader._wasmPath;
                 },
             }).then((module: typeof Module) => {
                 return module;

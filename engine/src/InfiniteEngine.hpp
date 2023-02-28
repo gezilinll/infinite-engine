@@ -8,6 +8,7 @@
 #include <memory>
 #include "Canvas.hpp"
 #include "Models.hpp"
+#include "CanvasRenderingContextSkia.hpp"
 
 class InfiniteEngine {
 public:
@@ -19,6 +20,7 @@ public:
 
 private:
     std::shared_ptr<Canvas> mCanvas;
+    std::shared_ptr<CanvasRenderingContextSkia> mContext;
 };
 
 #endif  // ENGINE_INFINITEENGINE_HPP

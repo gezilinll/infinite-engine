@@ -4,21 +4,25 @@ type WebGLContextHandle = number;
 
 export class InfiniteEngine {
     private _userCanvas: HTMLCanvasElement | OffscreenCanvas | null = null;
+    private _nativeEngine: any = undefined;
 
     constructor(idOrElement: HTMLCanvasElement | OffscreenCanvas | string) {
-        // var isHTMLCanvas = typeof HTMLCanvasElement !== 'undefined' && idOrElement instanceof HTMLCanvasElement;
-        // var isOffscreenCanvas = typeof OffscreenCanvas !== 'undefined' && idOrElement instanceof OffscreenCanvas;
-        // if (!isHTMLCanvas && !isOffscreenCanvas) {
-        //     if (!document.getElementById(idOrElement as string)) {
-        //         throw 'Canvas with id ' + idOrElement + ' was not found';
-        //     } else {
-        //         this._userCanvas = document.getElementById(idOrElement as string) as HTMLCanvasElement;
-        //     }
-        // } else {
-        //     this._userCanvas = isHTMLCanvas ? idOrElement as HTMLCanvasElement : idOrElement as OffscreenCanvas;
-        // }
-
-        // this._nativeCanvas = CanvasLoader.module.makeCanvas(this._userCanvas!.width, this._userCanvas!.height);
+        var isHTMLCanvas = typeof HTMLCanvasElement !== 'undefined' && idOrElement instanceof HTMLCanvasElement;
+        var isOffscreenCanvas = typeof OffscreenCanvas !== 'undefined' && idOrElement instanceof OffscreenCanvas;
+        if (!isHTMLCanvas && !isOffscreenCanvas) {
+            if (!document.getElementById(idOrElement as string)) {
+                throw 'Canvas with id ' + idOrElement + ' was not found';
+            } else {
+                this._userCanvas = document.getElementById(idOrElement as string) as HTMLCanvasElement;
+            }
+        } else {
+            this._userCanvas = isHTMLCanvas ? idOrElement as HTMLCanvasElement : idOrElement as OffscreenCanvas;
+        }
+        var ctx = this._getWebGLContext(this._userCanvas!);
+        if (!ctx || ctx < 0) {
+            throw 'failed to create webgl context: err ' + ctx;
+        }
+        this._nativeEngine = InfiniteLoader.module.makeEngine(this._userCanvas!.width, this._userCanvas!.height);
     }
 
     delete() {
@@ -40,13 +44,13 @@ export class InfiniteEngine {
             'renderViaOffscreenBackBuffer': 0,
             'majorVersion': (typeof WebGL2RenderingContext !== 'undefined') ? 2 : 1,
         };
-        var handle = CanvasLoader.module.GL.createContext(canvas, contextAttributes);
+        var handle = InfiniteLoader.module.GL.createContext(canvas, contextAttributes);
         if (!handle) {
             throw 'GL.createContext failed';
         }
-        CanvasLoader.module.GL.makeContextCurrent(handle);
+        InfiniteLoader.module.GL.makeContextCurrent(handle);
         // Emscripten does not enable this by default and Skia needs this to handle certain GPU corner cases.
-        CanvasLoader.module.GL.currentContext.GLctx.getExtension('WEBGL_debug_renderer_info');
+        InfiniteLoader.module.GL.currentContext.GLctx.getExtension('WEBGL_debug_renderer_info');
         return handle;
     }
 }
