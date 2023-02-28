@@ -8751,6 +8751,8 @@ var asmLibraryArg = {
   "invoke_vif": invoke_vif,
   "invoke_vii": invoke_vii,
   "invoke_viifff": invoke_viifff,
+  "invoke_viiffff": invoke_viiffff,
+  "invoke_viiffffffff": invoke_viiffffffff,
   "invoke_viiffi": invoke_viiffi,
   "invoke_viii": invoke_viii,
   "invoke_viiif": invoke_viiif,
@@ -9049,6 +9051,28 @@ function invoke_v(index) {
 }
 
 function invoke_viiiiii(index,a1,a2,a3,a4,a5,a6) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6);
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_viiffffffff(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_viiffff(index,a1,a2,a3,a4,a5,a6) {
   var sp = stackSave();
   try {
     getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6);

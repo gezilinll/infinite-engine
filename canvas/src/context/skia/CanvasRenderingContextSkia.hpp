@@ -12,6 +12,7 @@
 #include "SkiaUtils.hpp"
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkFont.h"
+#include "include/core/SkImage.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
 #include "include/core/SkSurface.h"
@@ -139,6 +140,12 @@ public:
     void strokeText(std::string text, SkScalar x, SkScalar y, SkScalar maxWidth = 0);
 
     void clearRect(SkScalar x, SkScalar y, SkScalar width, SkScalar height);
+
+    void drawImage(sk_sp<SkImage> image, SkScalar dx, SkScalar dy, SkScalar dWidth = 0,
+                   SkScalar dHeight = 0);
+
+    void drawImage(sk_sp<SkImage> image, SkScalar sx, SkScalar sy, SkScalar sWidth,
+                   SkScalar sHeight, SkScalar dx, SkScalar dy, SkScalar dWidth, SkScalar dHeight);
 
     void flush() { mSurface->flushAndSubmit(); }
 

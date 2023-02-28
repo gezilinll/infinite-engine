@@ -74,10 +74,9 @@ CanvasLoader.init().then(async () => {
 
 | API                      | Web                    | Android | iOS  | Windows | Mac  | Linux |
 | ------------------------ | ---------------------- | ------- | ---- | ------- | ---- | ----- |
-| direction                |                        |         |      |         |      |       |
 | fillStyle                | :ok:（仅支持颜色类型） |         |      |         |      |       |
 | filter                   |                        |         |      |         |      |       |
-| font                     |                        |         |      |         |      |       |
+| font                     | :white_check_mark:     |         |      |         |      |       |
 | fontKerning              |                        |         |      |         |      |       |
 | globalAlpha              | :white_check_mark:     |         |      |         |      |       |
 | globalCompositeOperation | :white_check_mark:     |         |      |         |      |       |
@@ -95,8 +94,6 @@ CanvasLoader.init().then(async () => {
 | textAlign                |                        |         |      |         |      |       |
 | textBaseline             |                        |         |      |         |      |       |
 | textRendering            |                        |         |      |         |      |       |
-| wordSpacing              |                        |         |      |         |      |       |
-| ...                      |                        |         |      |         |      |       |
 
 ### 实例方法
 

@@ -202,6 +202,27 @@ void CanvasRenderingContextSkia::stroke() {
     mSurface->getCanvas()->drawPath(mCurrentPath, strokePaint);
 }
 
+void CanvasRenderingContextSkia::drawImage(sk_sp<SkImage> image, SkScalar dx, SkScalar dy,
+                                           SkScalar dWidth, SkScalar dHeight) {
+    auto paint = getFillPaint();
+    SkRect srcRect = SkRect::MakeXYWH(0, 0, image->width(), image->height());
+    SkRect dstRect = SkRect::MakeXYWH(dx, dy, dWidth ? dWidth : image->width(),
+                                      dHeight ? dHeight : image->height());
+    mSurface->getCanvas()->drawImageRect(image, srcRect, dstRect, SkSamplingOptions(), &paint,
+                                         SkCanvas::kStrict_SrcRectConstraint);
+}
+
+void CanvasRenderingContextSkia::drawImage(sk_sp<SkImage> image, SkScalar sx, SkScalar sy,
+                                           SkScalar sWidth, SkScalar sHeight, SkScalar dx,
+                                           SkScalar dy, SkScalar dWidth, SkScalar dHeight) {
+    auto paint = getFillPaint();
+    SkRect srcRect = SkRect::MakeXYWH(sx, sy, sWidth, sHeight);
+    SkRect dstRect = SkRect::MakeXYWH(dx, dy, dWidth ? dWidth : image->width(),
+                                      dHeight ? dHeight : image->height());
+    mSurface->getCanvas()->drawImageRect(image, srcRect, dstRect, SkSamplingOptions(), &paint,
+                                         SkCanvas::kStrict_SrcRectConstraint);
+}
+
 void CanvasRenderingContextSkia::clearRect(SkScalar x, SkScalar y, SkScalar width,
                                            SkScalar height) {
     mPaint.setStyle(SkPaint::Style::kFill_Style);

@@ -2,6 +2,7 @@ import { CanvasLoader } from "./CanvasLoader";
 
 export class CanvasRenderingContext2D {
     private _nativeContext: any = undefined;
+    private _freeCanvas: HTMLCanvasElement | null = null;
 
     constructor(nativeContext: any) {
         this._nativeContext = nativeContext;
@@ -148,6 +149,33 @@ export class CanvasRenderingContext2D {
 
     clearRect(x: number, y: number, width: number, height: number) {
         this._nativeContext?.clearRect(x, y, width, height);
+    }
+
+    drawImage(image: CanvasImageSource, ...args: number[]) {
+        let width = image.width as number;
+        let height = image.height as number;
+        if (!this._freeCanvas) {
+            this._freeCanvas = document.createElement('canvas');
+        }
+        let ctx = this._freeCanvas.getContext('2d', { willReadFrequently: true });
+        this._freeCanvas.width = width;
+        this._freeCanvas.height = height;
+        ctx!.drawImage(image, 0, 0);
+
+        let imageData = ctx!.getImageData(0, 0, width, height);
+        var pptr = CanvasLoader.module._malloc(4 * width * height);
+        CanvasLoader.module.HEAPU8.set(imageData.data, pptr); // We always want to copy the bytes into the WASM heap.
+        // No need to _free pptr, Image takes it with SkData::MakeFromMalloc
+        if (arguments.length === 3 || arguments.length === 5) {
+            this._nativeContext?.drawImageWithoutClip(pptr, width, height, imageData.data.length, 4 * width,
+                arguments[1], arguments[2], arguments[3] || width, arguments[4] || height);
+        } else if (arguments.length === 9) {
+            this._nativeContext?.drawImageWithClip(pptr, width, height, imageData.data.length, 4 * width,
+                arguments[1], arguments[2], arguments[3], arguments[4],
+                arguments[5], arguments[6], arguments[7], arguments[8]);
+        } else {
+            throw 'invalid number of args for drawImage, need 3, 5, or 9; got ' + arguments.length;
+        }
     }
 
     flush() {

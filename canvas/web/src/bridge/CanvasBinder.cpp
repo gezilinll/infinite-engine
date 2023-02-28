@@ -9,6 +9,10 @@
 #include "Canvas.hpp"
 #include "CanvasRenderingContextSkia.hpp"
 #include "SkiaUtils.hpp"
+#include "include/core/SkAlphaType.h"
+#include "include/core/SkColorSpace.h"
+#include "include/core/SkColorType.h"
+#include "include/core/SkData.h"
 
 using namespace emscripten;
 using WASMPointerF32 = uintptr_t;
@@ -138,6 +142,31 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
                                                     float y, float width, float height) -> void {
                       self.clearRect(x, y, width, height);
                   }))
+        .function("drawImageWithoutClip",
+                  optional_override([](CanvasRenderingContextSkia& self, WASMPointerU8 pPtr,
+                                       int width, int height, int plen, size_t rowBytes, int dx,
+                                       int dy, int dWidth, int dHeight) -> void {
+                      uint8_t* imgData = reinterpret_cast<uint8_t*>(pPtr);
+                      SkImageInfo info = SkImageInfo::Make(
+                          width, height, SkColorType::kRGBA_8888_SkColorType,
+                          SkAlphaType::kUnpremul_SkAlphaType, SkColorSpace::MakeSRGB());
+                      sk_sp<SkData> pixelData = SkData::MakeFromMalloc(imgData, plen);
+                      self.drawImage(SkImage::MakeRasterData(info, pixelData, rowBytes), dx, dy,
+                                     dWidth, dHeight);
+                  }))
+        .function(
+            "drawImageWithClip",
+            optional_override([](CanvasRenderingContextSkia& self, WASMPointerU8 pPtr, int width,
+                                 int height, int plen, size_t rowBytes, int sx, int sy, int sWidth,
+                                 int sHeight, int dx, int dy, int dWidth, int dHeight) -> void {
+                uint8_t* imgData = reinterpret_cast<uint8_t*>(pPtr);
+                SkImageInfo info = SkImageInfo::Make(
+                    width, height, SkColorType::kRGBA_8888_SkColorType,
+                    SkAlphaType::kUnpremul_SkAlphaType, SkColorSpace::MakeSRGB());
+                sk_sp<SkData> pixelData = SkData::MakeFromMalloc(imgData, plen);
+                self.drawImage(SkImage::MakeRasterData(info, pixelData, rowBytes), sx, sy, sWidth,
+                               sHeight, dx, dy, dWidth, dHeight);
+            }))
         .function("flush", optional_override(
                                [](CanvasRenderingContextSkia& self) -> void { self.flush(); }));
 
