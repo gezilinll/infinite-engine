@@ -20,13 +20,12 @@ CanvasLoader.init().then(async () => {
   let canvas = new Canvas("canvas1");
   let ctx = canvas.getContext("2d");
   ctx.drawImage(canvasBitmapElement, 33, 71, 104, 124, 21, 20, 87, 104);
-  ctx.flush();
+  canvas.flush();
   canvas.delete();
-
 
   let canva2 = new Canvas("canvas2");
   let ctx2 = canva2.getContext("2d");
   ctx2.drawImage(canvasBitmapElement, 0, 0);
-  ctx2.flush();
+  canva2.flush();
   canva2.delete();
 });

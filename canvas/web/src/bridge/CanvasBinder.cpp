@@ -142,6 +142,9 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
                                                     float y, float width, float height) -> void {
                       self.clearRect(x, y, width, height);
                   }))
+        .function("readPixels", optional_override([](CanvasRenderingContextSkia& self) -> long {
+                      return self.readPixels();
+                  }))
         .function("drawImageWithoutClip",
                   optional_override([](CanvasRenderingContextSkia& self, WASMPointerU8 pPtr,
                                        int width, int height, int plen, size_t rowBytes, int dx,
@@ -166,9 +169,7 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
                 sk_sp<SkData> pixelData = SkData::MakeFromMalloc(imgData, plen);
                 self.drawImage(SkImage::MakeRasterData(info, pixelData, rowBytes), sx, sy, sWidth,
                                sHeight, dx, dy, dWidth, dHeight);
-            }))
-        .function("flush", optional_override(
-                               [](CanvasRenderingContextSkia& self) -> void { self.flush(); }));
+            }));
 
     class_<Canvas>("Canvas")
         .smart_ptr<std::shared_ptr<Canvas>>("std::shared_ptr<Canvas>")
@@ -178,6 +179,7 @@ EMSCRIPTEN_BINDINGS(CanvasBinder) {
                 auto baseContext = self.getContext("2d");
                 return std::dynamic_pointer_cast<CanvasRenderingContextSkia>(baseContext);
             }))
+        .function("flush", optional_override([](Canvas& self) -> void { self.flush(); }))
         .function("loadFont", optional_override([](Canvas& self, WASMPointerU8 fPtr, int byteLength,
                                                    std::string family, std::string style,
                                                    std::string weight) -> void {

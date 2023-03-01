@@ -15,6 +15,6 @@ CanvasLoader.init().then(async () => {
   // Rectangle
   ctx.fillStyle = "blue";
   ctx.fillRect(20, 20, 150, 80);
-  ctx.flush();
+  canvas.flush();
   canvas.delete();
 });

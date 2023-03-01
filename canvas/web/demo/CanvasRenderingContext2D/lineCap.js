@@ -13,7 +13,7 @@ CanvasLoader.init().then(async () => {
   ctx.lineCap = 'round';
   ctx.lineTo(100, 100);
   ctx.stroke();
-  ctx.flush();
+  canvas.flush();
   canvas.delete();
 
   let canvas2 = new Canvas("canvas2");
@@ -36,6 +36,6 @@ CanvasLoader.init().then(async () => {
     ctx2.lineTo(25 + i * 50, 140);
     ctx2.stroke();
   });
-  ctx2.flush();
+  canvas2.flush();
   canvas2.delete();
 });

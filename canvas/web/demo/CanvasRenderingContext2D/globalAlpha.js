@@ -12,7 +12,7 @@ CanvasLoader.init().then(async () => {
   ctx.fillRect(10, 10, 100, 100);
   ctx.fillStyle = 'red';
   ctx.fillRect(50, 50, 100, 100);
-  ctx.flush();
+  canvas.flush();
   canvas.delete();
 
   let canvas2 = new Canvas("canvas2");
@@ -35,7 +35,7 @@ CanvasLoader.init().then(async () => {
     ctx2.arc(75, 75, 10 + 10 * i, 0, Math.PI * 2, true);
     ctx2.fill();
   }
-  ctx2.flush();
+  canvas2.flush();
   canvas2.delete();
 
 });

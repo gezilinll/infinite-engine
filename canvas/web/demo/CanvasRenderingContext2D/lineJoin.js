@@ -15,7 +15,7 @@ CanvasLoader.init().then(async () => {
   ctx.lineTo(280, 20);
   ctx.lineTo(280, 150);
   ctx.stroke();
-  ctx.flush();
+  canvas.flush();
   canvas.delete();
 
   let canvas2 = new Canvas("canvas2");
@@ -32,6 +32,6 @@ CanvasLoader.init().then(async () => {
     ctx2.lineTo(155, 5 + i * 40);
     ctx2.stroke();
   });
-  ctx2.flush();
+  canvas2.flush();
   canvas2.delete();
 });

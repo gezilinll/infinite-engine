@@ -24,7 +24,7 @@ CanvasLoader.init().then(async () => {
         ctx.fillStyle = 'black';
         ctx.font = '26px Bungee';
         ctx.fillText('Awesome ', 25, 100);
-        ctx.flush();
-        ctx.delete();
+        canvas.flush();
+        canvas.delete();
       });
 });

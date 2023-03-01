@@ -13,6 +13,6 @@ CanvasLoader.init().then(async () => {
   ctx.lineTo(130, 130);
   ctx.rect(40, 40, 70, 70);
   ctx.stroke();
-  ctx.flush();
+  canvas.flush();
   canvas.delete();
 });

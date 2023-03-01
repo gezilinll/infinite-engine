@@ -9,7 +9,7 @@ CanvasLoader.init().then(async () => {
   let ctx = canvas.getContext("2d");
   ctx.strokeStyle = "blue";
   ctx.strokeRect(10, 10, 100, 100);
-  ctx.flush();
+  canvas.flush();
   canvas.delete();
 
   let canvas2 = new Canvas("canvas2");
@@ -25,6 +25,6 @@ CanvasLoader.init().then(async () => {
       ctx2.stroke();
     }
   }
-  ctx2.flush();
+  canvas2.flush();
   canvas2.delete();
 });

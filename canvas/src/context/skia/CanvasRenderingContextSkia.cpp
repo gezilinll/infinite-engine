@@ -36,6 +36,8 @@ CanvasRenderingContextSkia::CanvasRenderingContextSkia(int width, int height,
       mCanvasWidth(width),
       mCanvasHeight(height),
       mFontManager(fontManager) {
+    mRenderResult = malloc(width * height * 4);
+
     mPaint.setAntiAlias(true);
     mPaint.setStrokeMiter(10);
     mPaint.setStrokeCap(SkPaint::Cap::kButt_Cap);
@@ -235,30 +237,10 @@ void CanvasRenderingContextSkia::clearRect(SkScalar x, SkScalar y, SkScalar widt
 #include <emscripten/html5.h>
 #include <webgl/webgl1.h>
 void CanvasRenderingContextSkia::makeSurfaceByPlatform() {
-    GrGLint sampleCnt;
-    emscripten_glGetIntegerv(GL_SAMPLES, &sampleCnt);
-
-    GrGLint stencil;
-    emscripten_glGetIntegerv(GL_STENCIL_BITS, &stencil);
-    // WebGL should already be clearing the color and stencil buffers, but do it again here to
-    // ensure Skia receives them in the expected state.
-    emscripten_glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    emscripten_glClearColor(0, 0, 0, 0);
-    emscripten_glClearStencil(0);
-    emscripten_glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    mContext->resetContext(kRenderTarget_GrGLBackendState | kMisc_GrGLBackendState);
-
-    // The on-screen canvas is FBO 0. Wrap it in a Skia render target so Skia can render to it.
-    GrGLFramebufferInfo info;
-    info.fFBOID = 0;
-
-    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-    const auto colorSettings = ColorSettings(colorSpace);
-    info.fFormat = colorSettings.pixFormat;
-    GrBackendRenderTarget target(mCanvasWidth, mCanvasHeight, sampleCnt, stencil, info);
-    sk_sp<SkSurface> surface(
-        SkSurface::MakeFromBackendRenderTarget(mContext.get(), target, kBottomLeft_GrSurfaceOrigin,
-                                               colorSettings.colorType, colorSpace, nullptr));
+    SkImageInfo info
+        = SkImageInfo::Make(mCanvasWidth, mCanvasHeight, SkColorType::kRGBA_8888_SkColorType,
+                            SkAlphaType::kUnpremul_SkAlphaType, SkColorSpace::MakeSRGB());
+    sk_sp<SkSurface> surface(SkSurface::MakeRasterDirect(info, mRenderResult, mCanvasWidth * 4));
     mSurface = surface;
 }
 #else

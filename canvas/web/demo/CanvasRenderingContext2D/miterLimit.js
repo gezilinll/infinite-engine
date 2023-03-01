@@ -20,6 +20,6 @@ CanvasLoader.init().then(async () => {
     ctx.lineTo(Math.pow(i, 1.5) * 2, 75 + dy);
   }
   ctx.stroke();
-  ctx.flush();
+  canvas.flush();
   canvas.delete();
 });

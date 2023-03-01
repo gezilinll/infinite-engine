@@ -14,6 +14,8 @@ public:
 
     void loadFont(const void* data, size_t length, const FontInfo& info);
 
+    void flush();
+
 private:
     int mWidth;
     int mHeight;

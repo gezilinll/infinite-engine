@@ -16,6 +16,6 @@ CanvasLoader.init().then(async () => {
   ctx.fillStyle = "red";
   ctx.fillRect(50, 50, 100, 100);
 
-  ctx.flush();
+  canvas.flush();
   canvas.delete();
 });

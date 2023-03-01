@@ -149,6 +149,8 @@ public:
 
     void flush() { mSurface->flushAndSubmit(); }
 
+    long readPixels() { return reinterpret_cast<long>(mRenderResult); }
+
 private:
     void makeSurfaceByPlatform();
 
@@ -163,6 +165,7 @@ private:
 private:
     int mCanvasWidth;
     int mCanvasHeight;
+    void* mRenderResult;
     SkScalar mGlobalAlpha = 1;
     SkBlendMode mGlobalCompositeOperation = SkBlendMode::kSrcOver;
 

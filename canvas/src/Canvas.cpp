@@ -10,7 +10,8 @@ Canvas::~Canvas() {}
 std::shared_ptr<CanvasRenderingContextBase> Canvas::getContext(std::string typeName) {
     if (typeName == "2d") {
         if (!mContextSkia) {
-            mContextSkia = std::make_shared<CanvasRenderingContextSkia>(mWidth, mHeight, mFontManager);
+            mContextSkia
+                = std::make_shared<CanvasRenderingContextSkia>(mWidth, mHeight, mFontManager);
         }
         return mContextSkia;
     } else {
@@ -18,8 +19,12 @@ std::shared_ptr<CanvasRenderingContextBase> Canvas::getContext(std::string typeN
     }
 }
 
-void Canvas::loadFont(const void *data, size_t length, const FontInfo &info) {
+void Canvas::loadFont(const void* data, size_t length, const FontInfo& info) {
     mFontManager->loadFont(data, length, info);
 }
 
-
+void Canvas::flush() {
+    if (mContextSkia) {
+        std::dynamic_pointer_cast<CanvasRenderingContextSkia>(mContextSkia)->flush();
+    }
+}

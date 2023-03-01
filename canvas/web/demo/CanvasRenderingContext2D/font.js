@@ -22,7 +22,7 @@ CanvasLoader.init().then(async () => {
         ctx.font = "bold 48px serif";
         ctx.strokeText("Hello world", 50, 100);
 
-        ctx.flush();
-        ctx.delete();
+        canvas.flush();
+        canvas.delete();
       });
 });

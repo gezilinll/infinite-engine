@@ -3,9 +3,13 @@ import { CanvasLoader } from "./CanvasLoader";
 export class CanvasRenderingContext2D {
     private _nativeContext: any = undefined;
     private _freeCanvas: HTMLCanvasElement | null = null;
+    private _width: number;
+    private _height: number;
 
-    constructor(nativeContext: any) {
+    constructor(nativeContext: any, width: number, height: number) {
         this._nativeContext = nativeContext;
+        this._width = width;
+        this._height = height;
     }
 
     delete() {
@@ -178,7 +182,12 @@ export class CanvasRenderingContext2D {
         }
     }
 
-    flush() {
-        this._nativeContext?.flush();
+    readPixels() {
+        if (this._nativeContext) {
+            var pixels = new Uint8ClampedArray(CanvasLoader.module.HEAPU8.buffer, this._nativeContext.readPixels(), this._width * this._height * 4);
+            var imageData = new ImageData(pixels, this._width, this._height);
+            return imageData;
+        }
+        return null;
     }
 }

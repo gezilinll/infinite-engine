@@ -9,7 +9,7 @@ CanvasLoader.init().then(async () => {
   let ctx = canvas.getContext("2d");
   ctx.fillStyle = 'blue';
   ctx.fillRect(10, 10, 100, 100);
-  ctx.flush();
+  canvas.flush();
   canvas.delete();
 
   let canvas2 = new Canvas("canvas2");
@@ -21,6 +21,6 @@ CanvasLoader.init().then(async () => {
       ctx2.fillRect(150 + j * 25, i * 25, 25, 25);
     }
   }
-  ctx2.flush();
+  canvas2.flush();
   canvas2.delete();
 });

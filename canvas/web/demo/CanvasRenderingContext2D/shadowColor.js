@@ -18,6 +18,6 @@ CanvasLoader.init().then(async () => {
   // Stroked rectangle
   ctx.lineWidth = 6;
   ctx.strokeRect(170, 20, 100, 100);
-  ctx.flush();
+  canvas.flush();
   canvas.delete();
 });

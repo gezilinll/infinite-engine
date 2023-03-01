@@ -20,7 +20,7 @@ CanvasLoader.init().then(async () => {
   ctx.moveTo(0, 100);
   ctx.lineTo(300, 100);
   ctx.stroke();
-  ctx.flush();
+  canvas.flush();
 
   let canvas2 = new Canvas("canvas2");
   let ctx2 = canvas2.getContext("2d");
@@ -30,7 +30,7 @@ CanvasLoader.init().then(async () => {
     ctx2.setLineDash([4, 2]);
     ctx2.lineDashOffset = -offset;
     ctx2.strokeRect(10, 10, 100, 100);
-    ctx2.flush();
+    canvas2.flush();
   }
   function march() {
     offset++;
