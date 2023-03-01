@@ -17,9 +17,13 @@ void InfiniteEngine::loadFont(const void* data, size_t length, const FontInfo& i
 
 void InfiniteEngine::addElement(std::shared_ptr<Element> element) { mElements.push_back(element); }
 
-void InfiniteEngine::requestRenderFrame() {
+bool InfiniteEngine::requestRenderFrame() {
+    bool frameUpdated = false;
     for (auto element : mElements) {
-        element->requestRender(mContext);
+        frameUpdated = element->requestRender(mContext) || frameUpdated;
     }
-    mContext->flush();
+    if (frameUpdated) {
+        mContext->flush();
+    }
+    return frameUpdated;
 }

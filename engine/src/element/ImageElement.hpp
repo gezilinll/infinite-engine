@@ -20,11 +20,12 @@ public:
 
     void setDstRect(SkScalar x, SkScalar y, SkScalar width, SkScalar height);
 
-    void requestRender(std::shared_ptr<CanvasRenderingContextSkia> context);
+    bool requestRender(std::shared_ptr<CanvasRenderingContextSkia> context);
 
 private:
     SkRect mSrcRect;
     SkRect mDstRect;
+    bool mHasRendered;
     sk_sp<SkImage> mImageData;
 };
 

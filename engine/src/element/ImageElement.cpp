@@ -4,7 +4,7 @@
 
 #include "ImageElement.hpp"
 
-ImageElement::ImageElement(int32_t id) : Element(id) {}
+ImageElement::ImageElement(int32_t id) : Element(id), mHasRendered(false) {}
 
 ImageElement::~ImageElement() {}
 
@@ -18,8 +18,8 @@ void ImageElement::setDstRect(SkScalar x, SkScalar y, SkScalar width, SkScalar h
     mDstRect = SkRect::MakeXYWH(x, y, width, height);
 }
 
-void ImageElement::requestRender(std::shared_ptr<CanvasRenderingContextSkia> context) {
-    if (mImageData) {
+bool ImageElement::requestRender(std::shared_ptr<CanvasRenderingContextSkia> context) {
+    if (mImageData && !mHasRendered) {
         SkScalar sx, sy, sw, sh, dx, dy, dw, dh;
         sx = mSrcRect.x();
         sy = mSrcRect.y();
@@ -30,5 +30,8 @@ void ImageElement::requestRender(std::shared_ptr<CanvasRenderingContextSkia> con
         dw = mDstRect.width() > 0 ? mDstRect.width() : mImageData->width();
         dh = mDstRect.height() > 0 ? mDstRect.height() : mImageData->height();
         context->drawImage(mImageData, sx, sy, sw, sh, dx, dy, dw, dh);
+        mHasRendered = true;
+        return true;
     }
+    return false;
 }

@@ -7,6 +7,9 @@ type WebGLContextHandle = number;
 export class InfiniteEngine {
     private _userCanvas: HTMLCanvasElement | OffscreenCanvas | null = null;
     private _nativeEngine: any = undefined;
+    private _glContextHandle: any = undefined;
+    private _screenCanvas: HTMLCanvasElement | null = null;
+    private elementCount: number = 0;
 
     constructor(idOrElement: HTMLCanvasElement | OffscreenCanvas | string) {
         var isHTMLCanvas = typeof HTMLCanvasElement !== 'undefined' && idOrElement instanceof HTMLCanvasElement;
@@ -16,15 +19,25 @@ export class InfiniteEngine {
                 throw 'Canvas with id ' + idOrElement + ' was not found';
             } else {
                 this._userCanvas = document.getElementById(idOrElement as string) as HTMLCanvasElement;
+                isHTMLCanvas = true;
             }
         } else {
             this._userCanvas = isHTMLCanvas ? idOrElement as HTMLCanvasElement : idOrElement as OffscreenCanvas;
         }
+        if (isHTMLCanvas) {
+            this._screenCanvas = document.createElement('canvas');
+            this._screenCanvas.width = this._userCanvas.width;
+            this._screenCanvas.height = this._userCanvas.height;
+            (this._userCanvas as HTMLCanvasElement).parentNode!.replaceChild(this._screenCanvas, this._userCanvas as HTMLCanvasElement);
+        }
+
         var ctx = this._getWebGLContext(this._userCanvas!);
         if (!ctx || ctx < 0) {
             throw 'failed to create webgl context: err ' + ctx;
         }
+        this._glContextHandle = ctx;
         this._nativeEngine = InfiniteLoader.module.makeEngine(this._userCanvas!.width, this._userCanvas!.height);
+
         requestAnimationFrame(this._requestRenderFrame.bind(this));
     }
 
@@ -33,6 +46,7 @@ export class InfiniteEngine {
     }
 
     addElement(element: Element) {
+        this.elementCount++;
         if (element instanceof ImageElement) {
             this._nativeEngine?.addImageElement(element.getNativeElement());
         }
@@ -64,7 +78,14 @@ export class InfiniteEngine {
     }
 
     private _requestRenderFrame() {
-        this._nativeEngine?.requestRenderFrame();
+        InfiniteLoader.module.GL.makeContextCurrent(this._glContextHandle);
+        let frameUpdated = this._nativeEngine ? this._nativeEngine.requestRenderFrame() : false;
+        if (frameUpdated && this._nativeEngine && this._screenCanvas) {
+            let pixelsPtr = this._nativeEngine.readPixels();
+            var pixels = new Uint8ClampedArray(InfiniteLoader.module.HEAPU8.buffer, pixelsPtr, this._userCanvas!.width * this._userCanvas!.height * 4);
+            var imageData = new ImageData(pixels, this._userCanvas!.width, this._userCanvas!.height);
+            this._screenCanvas.getContext('2d')?.putImageData(imageData, 0, 0);
+        }
         requestAnimationFrame(this._requestRenderFrame.bind(this));
     }
 }

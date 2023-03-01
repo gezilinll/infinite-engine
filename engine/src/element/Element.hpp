@@ -13,7 +13,7 @@ public:
 
     virtual ~Element();
 
-    virtual void requestRender(std::shared_ptr<CanvasRenderingContextSkia> context);
+    virtual bool requestRender(std::shared_ptr<CanvasRenderingContextSkia> context);
 
 protected:
     int32_t mId;

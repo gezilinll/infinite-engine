@@ -6,7 +6,7 @@ const { default: wasmURL } = await import('./InfiniteEngine.wasm?url');
 InfiniteLoader.wasmPath = wasmURL;
 
 InfiniteLoader.init().then(async () => {
-    let engine = new InfiniteEngine("canvas");
+    let engine = new InfiniteEngine("isurface");
 
     const response = await fetch("http://rqm1nmwwk.hn-bkt.clouddn.com/logo.jpg");
     const arrayBuffer = await response.arrayBuffer();

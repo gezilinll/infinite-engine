@@ -8,8 +8,8 @@
 #include <memory>
 #include "Canvas.hpp"
 #include "CanvasRenderingContextSkia.hpp"
-#include "Models.hpp"
 #include "Element.hpp"
+#include "Models.hpp"
 
 class InfiniteEngine {
 public:
@@ -21,7 +21,9 @@ public:
 
     void addElement(std::shared_ptr<Element> element);
 
-    void requestRenderFrame();
+    bool requestRenderFrame();
+
+    long readPixels() { return mContext->readPixels(); };
 
 private:
     std::vector<std::shared_ptr<Element>> mElements;

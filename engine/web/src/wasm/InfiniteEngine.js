@@ -8742,7 +8742,6 @@ var asmLibraryArg = {
   "invoke_viiiii": invoke_viiiii,
   "invoke_viiiiii": invoke_viiiiii,
   "invoke_viiiiiii": invoke_viiiiiii,
-  "invoke_viiiiiiiii": invoke_viiiiiiiii,
   "invoke_viiiiiiiiii": invoke_viiiiiiiiii,
   "invoke_viiiiiiiiiiiiiii": invoke_viiiiiiiiiiiiiii,
   "setTempRet0": _setTempRet0,
@@ -8755,6 +8754,11 @@ var ___wasm_call_ctors = Module["___wasm_call_ctors"] = function() {
 };
 
 /** @type {function(...*):?} */
+var _malloc = Module["_malloc"] = function() {
+  return (_malloc = Module["_malloc"] = Module["asm"]["malloc"]).apply(null, arguments);
+};
+
+/** @type {function(...*):?} */
 var ___errno_location = Module["___errno_location"] = function() {
   return (___errno_location = Module["___errno_location"] = Module["asm"]["__errno_location"]).apply(null, arguments);
 };
@@ -8762,11 +8766,6 @@ var ___errno_location = Module["___errno_location"] = function() {
 /** @type {function(...*):?} */
 var _free = Module["_free"] = function() {
   return (_free = Module["_free"] = Module["asm"]["free"]).apply(null, arguments);
-};
-
-/** @type {function(...*):?} */
-var _malloc = Module["_malloc"] = function() {
-  return (_malloc = Module["_malloc"] = Module["asm"]["malloc"]).apply(null, arguments);
 };
 
 /** @type {function(...*):?} */
@@ -9079,17 +9078,6 @@ function invoke_iiif(index,a1,a2,a3) {
   var sp = stackSave();
   try {
     return getWasmTableEntry(index)(a1,a2,a3);
-  } catch(e) {
-    stackRestore(sp);
-    if (e !== e+0) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_viiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9) {
-  var sp = stackSave();
-  try {
-    getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6,a7,a8,a9);
   } catch(e) {
     stackRestore(sp);
     if (e !== e+0) throw e;

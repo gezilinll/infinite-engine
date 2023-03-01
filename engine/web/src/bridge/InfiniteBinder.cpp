@@ -47,8 +47,11 @@ EMSCRIPTEN_BINDINGS(InfiniteBinding) {
         .function("addImageElement",
                   optional_override([](InfiniteEngine& self, std::shared_ptr<ImageElement>& element)
                                         -> void { self.addElement(element); }))
-        .function("requestRenderFrame", optional_override([](InfiniteEngine& self) -> void {
-                      self.requestRenderFrame();
+        .function("requestRenderFrame", optional_override([](InfiniteEngine& self) -> bool {
+                      return self.requestRenderFrame();
+                  }))
+        .function("readPixels", optional_override([](InfiniteEngine& self) -> long {
+                      return self.readPixels();
                   }));
 
     class_<Element>("Element").smart_ptr<std::shared_ptr<Element>>("std::shared_ptr<Element>");
