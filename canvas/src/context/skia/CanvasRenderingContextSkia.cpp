@@ -37,6 +37,7 @@ CanvasRenderingContextSkia::CanvasRenderingContextSkia(int width, int height,
       mCanvasHeight(height),
       mFontManager(fontManager) {
     mRenderResult = malloc(width * height * 4);
+    memset(mRenderResult, 0, width * height * 4);
 
     mPaint.setAntiAlias(true);
     mPaint.setStrokeMiter(10);
