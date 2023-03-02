@@ -57,6 +57,8 @@ export class ImageElement extends Element {
 
     set source(image: CanvasImageSource) {
         this._source = image;
+        this._sourceW = image.width as number;
+        this._sourceH = image.height as number;
         if (this._status.srcRect.width <= 0 || this._status.srcRect.height <= 0) {
             this._status.srcRect = Rect.MakeXYWH(0, 0, image.width as number, image.height as number);
         }
@@ -89,7 +91,6 @@ export class ImageElement extends Element {
     }
 
     requestRenderDirty(context: CanvasRenderingContext2D, dirtyRect: Rect): void {
-        console.log("requestRenderDirty");
         if (this._source) {
             let dstRect = Rect.Intersects(this._status.dstRect, dirtyRect);
             let sx = 0, sy = 0, sw = 0, sh = 0;
