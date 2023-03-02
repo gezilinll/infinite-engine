@@ -1,16 +1,27 @@
-import { InfiniteLoader } from "../InfiniteLoader";
-import { Element } from "./Element";
+import { ElementRBush } from "../base/ElementRBush";
+import { Element, ElementStatus } from "./Element";
+import { Rect } from "../base/Rect";
+
+
+class ImageElementStatus extends ElementStatus {
+    lastDstRect: Rect = Rect.MakeEmpty();
+    srcRect: Rect = Rect.MakeEmpty();
+    dstRect: Rect = Rect.MakeEmpty();
+}
 
 export class ImageElement extends Element {
-    private _freeCanvas: HTMLCanvasElement | null = null;
     private _sourceW: number = 0;
     private _sourceH: number = 0;
+    private _source: CanvasImageSource | null = null;
+    private _status: ImageElementStatus = new ImageElementStatus();
 
     constructor(id: number) {
         super(id);
-        this.setNativeElement(InfiniteLoader.module.makeImageElement(id));
     }
 
+    get dstRect() {
+        return this._status.dstRect;
+    }
     get sourceWidth() {
         return this._sourceW;
     }
@@ -19,29 +30,41 @@ export class ImageElement extends Element {
         return this._sourceH;
     }
 
-    setSource(image: CanvasImageSource) {
-        this._sourceW = image.width as number;
-        this._sourceH = image.height as number;
-        if (!this._freeCanvas) {
-            this._freeCanvas = document.createElement('canvas');
+    bindSceneTree(sceneTree: ElementRBush): void {
+        super.bindSceneTree(sceneTree);
+        this._updateSceneTree(false);
+    }
+
+    private _updateSceneTree(removed: boolean) {
+        if (removed) {
+            // TODO
+        } else if (this._sceneTree && this._source) {
+            if (this._status.isInScene) {
+                this._sceneTree.remove(this);
+            }
+            this._sceneTree.insert(this);
+            this._status.isInScene = true;
         }
-        let ctx = this._freeCanvas.getContext('2d', { willReadFrequently: true });
-        this._freeCanvas.width = this._sourceW;
-        this._freeCanvas.height = this._sourceH;
-        ctx!.drawImage(image, 0, 0);
-
-        let imageData = ctx!.getImageData(0, 0, this._sourceW, this._sourceH);
-        var pptr = InfiniteLoader.module._malloc(4 * this._sourceW * this._sourceH);
-        InfiniteLoader.module.HEAPU8.set(imageData.data, pptr); // We always want to copy the bytes into the WASM heap.
-        // No need to _free pptr, Image takes it with SkData::MakeFromMalloc
-        this._nativeElement?.setSource(pptr, this._sourceW, this._sourceH, imageData.data.length, 4 * this._sourceW);
     }
 
-    setSrcRect(x: number, y: number, width: number, height: number) {
-        this._nativeElement?.setSrcRect(x, y, width, height);
+    setSource(image: CanvasImageSource) {
+        this._source = image;
+        this._updateSceneTree(false);
     }
 
-    setDstRect(x: number, y: number, width: number, height: number) {
-        this._nativeElement?.setDstRect(x, y, width, height);
+    set srcRect(rect: Rect) {
+        this._status.srcRect = rect;
+        this._updateSceneTree(false);
+    }
+
+    set dstRect(rect: Rect) {
+        this._status.dstRect = rect;
+        this._updateSceneTree(false);
+    }
+
+    requestRender(context: CanvasRenderingContext2D): void {
+        if (this._source) {
+            context.drawImage(this._source, 0, 0, this._source.width as number, this._source.height as number, 0, 0, 1000, 1000);
+        }
     }
 }

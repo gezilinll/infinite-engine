@@ -9,7 +9,6 @@
 #include "include/core/SkImage.h"
 
 struct ImageElementStatus : public ElementStatus {
-    bool isInScene = false;
     SkRect rectInScene;
     SkRect lastDstRect;
     SkRect srcRect;

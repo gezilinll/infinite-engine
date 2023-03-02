@@ -1,6 +1,13 @@
+import { ElementRBush } from "../base/ElementRBush";
+import { Rect } from "../base/Rect";
+
+export class ElementStatus {
+    isInScene: boolean = false;
+}
+
 export class Element {
     private _id: number;
-    protected _nativeElement: any = undefined;
+    protected _sceneTree: ElementRBush | null = null;
 
     constructor(id: number) {
         this._id = id;
@@ -10,11 +17,13 @@ export class Element {
         return this._id;
     }
 
-    protected setNativeElement(element: any) {
-        this._nativeElement = element;
+    get dstRect() {
+        return Rect.MakeEmpty();
     }
 
-    getNativeElement() {
-        return this._nativeElement;
+    bindSceneTree(sceneTree: ElementRBush) { this._sceneTree = sceneTree; }
+
+    requestRender(context: CanvasRenderingContext2D) {
     }
+
 }
