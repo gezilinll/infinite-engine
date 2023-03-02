@@ -41,8 +41,45 @@ bool InfiniteEngine::requestRenderFrame() {
         = !(mChangedElements.empty() && mAddedElements.empty() && !ifEngineStatusChanged());
     if (frameUpdated) {
         if (!mChangedElements.empty()) {
-            // TODO
-        } else if (!mAddedElements.empty()) {
+            std::vector<SkRect> rectsToClear;
+            std::vector<SkRect> rectsToDraw;
+            for (auto element : mChangedElements) {
+                rectsToClear.push_back(element.second->getRectToClear());
+                rectsToDraw.push_back(element.second->getRectToDraw());
+            }
+            for (auto& rect : rectsToClear) {
+                mContext->clearRect(rect.x(), rect.y(), rect.width(), rect.height());
+                float min[2] = {rect.x(), rect.y()};
+                float max[2] = {rect.x() + rect.width(), rect.y() + rect.height()};
+                std::unordered_map<uint32_t, uint8_t> elementsToDraw;
+                mSceneTree->Search(&min[0], &max[0], [&](const uint32_t& id) {
+                    elementsToDraw.insert(std::make_pair(id, 1));
+                    return true;
+                });
+                for (auto element : mElements) {
+                    if (elementsToDraw.find(element->getID()) != elementsToDraw.end()
+                        && element->getRectToDraw().intersect(rect)) {
+                        element->requestRenderDirty(mContext, rect);
+                    }
+                }
+            }
+            for (auto& rect : rectsToDraw) {
+                mContext->clearRect(rect.x(), rect.y(), rect.width(), rect.height());
+                std::unordered_map<uint32_t, uint8_t> elementsToDraw;
+                float min[2] = {rect.x(), rect.y()};
+                float max[2] = {rect.x() + rect.width(), rect.y() + rect.height()};
+                mSceneTree->Search(&min[0], &max[0], [&](const uint32_t& id) {
+                    elementsToDraw.insert(std::make_pair(id, 1));
+                    return true;
+                });
+                for (auto element : mElements) {
+                    if (elementsToDraw.find(element->getID()) != elementsToDraw.end()) {
+                        element->requestRenderDirty(mContext, rect);
+                    }
+                }
+            }
+        }
+        if (!mAddedElements.empty()) {
             for (auto element : mAddedElements) {
                 element->requestRender(mContext);
             }

@@ -26,12 +26,17 @@ public:
 
     void setSource(sk_sp<SkImage> image);
 
+    SkRect getRectToClear() override;
+
+    SkRect getRectToDraw() override;
+
     void setSrcRect(SkScalar x, SkScalar y, SkScalar width, SkScalar height);
 
     void setDstRect(SkScalar x, SkScalar y, SkScalar width, SkScalar height);
 
     void requestRender(std::shared_ptr<CanvasRenderingContextSkia> context) override;
 
+    void requestRenderDirty(std::shared_ptr<CanvasRenderingContextSkia> context, const SkRect &dirtyRect) override;
 private:
     void updateSceneInfo(bool removed);
 

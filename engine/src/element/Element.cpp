@@ -16,4 +16,14 @@ void Element::invokeStatusObserver() {
     }
 }
 
+SkRect Element::getRectToClear() {
+    return SkRect::MakeEmpty();
+}
+
+SkRect Element::getRectToDraw() {
+    return SkRect::MakeEmpty();
+}
+
 void Element::requestRender(std::shared_ptr<CanvasRenderingContextSkia> context) {}
+
+void Element::requestRenderDirty(std::shared_ptr<CanvasRenderingContextSkia> context, const SkRect &dirtyRect) {}

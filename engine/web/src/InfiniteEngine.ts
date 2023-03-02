@@ -9,7 +9,9 @@ export class InfiniteEngine {
     private _nativeEngine: any = undefined;
     private _glContextHandle: any = undefined;
     private _screenCanvas: HTMLCanvasElement | null = null;
-    private elementCount: number = 0;
+    private _width: number;
+    private _height: number;
+    private _elements: Array<Element> = new Array();
 
     constructor(idOrElement: HTMLCanvasElement | OffscreenCanvas | string) {
         var isHTMLCanvas = typeof HTMLCanvasElement !== 'undefined' && idOrElement instanceof HTMLCanvasElement;
@@ -24,6 +26,9 @@ export class InfiniteEngine {
         } else {
             this._userCanvas = isHTMLCanvas ? idOrElement as HTMLCanvasElement : idOrElement as OffscreenCanvas;
         }
+        this._width = this._userCanvas.width;
+        this._height = this._userCanvas.height;
+
         if (isHTMLCanvas) {
             this._screenCanvas = document.createElement('canvas');
             this._screenCanvas.width = this._userCanvas.width;
@@ -46,10 +51,26 @@ export class InfiniteEngine {
     }
 
     addElement(element: Element) {
-        this.elementCount++;
+        this._elements.push(element);
         if (element instanceof ImageElement) {
             this._nativeEngine?.addImageElement(element.getNativeElement());
         }
+    }
+
+    getElementByID(id: number): Element | undefined {
+        return this._elements.find(element => { return element.ID == id; });
+    }
+
+    get elementsLength() {
+        return this._elements.length;
+    }
+
+    get width() {
+        return this._width;
+    }
+
+    get height() {
+        return this._height;
     }
 
     enableDrawScene() {
@@ -95,7 +116,7 @@ export class InfiniteEngine {
             var imageData = new ImageData(pixels, this._userCanvas!.width, this._userCanvas!.height);
             this._screenCanvas.getContext('2d')?.putImageData(imageData, 0, 0);
             let endTime = +new Date();
-            console.log("元素数量：" + this.elementCount + " 耗时：" + (endTime - startTime) + "ms")
+            console.log("元素数量：" + this._elements.length + " 耗时：" + (endTime - startTime) + "ms")
         }
         requestAnimationFrame(this._requestRenderFrame.bind(this));
     }

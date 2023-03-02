@@ -6,6 +6,10 @@ export class Element {
         this._id = id;
     }
 
+    get ID() {
+        return this._id;
+    }
+
     protected setNativeElement(element: any) {
         this._nativeElement = element;
     }

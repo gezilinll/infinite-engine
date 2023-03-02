@@ -25,7 +25,13 @@ public:
 
     void registerStatusObserver(StatusObserver observer);
 
+    virtual SkRect getRectToClear();
+
+    virtual SkRect getRectToDraw();
+
     virtual void requestRender(std::shared_ptr<CanvasRenderingContextSkia> context);
+
+    virtual void requestRenderDirty(std::shared_ptr<CanvasRenderingContextSkia> context, const SkRect &dirtyRect);
 
     virtual void bindSceneTree(std::shared_ptr<SceneTree> sceneTree) { mSceneTree = sceneTree;}
 
