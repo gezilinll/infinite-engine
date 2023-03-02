@@ -10,6 +10,7 @@
 #include "CanvasRenderingContextSkia.hpp"
 #include "Element.hpp"
 #include "Models.hpp"
+#include "RTree.h"
 
 class InfiniteEngine {
 public:
@@ -26,7 +27,15 @@ public:
     long readPixels() { return mContext->readPixels(); };
 
 private:
+    void onElementStatusChanged(std::shared_ptr<Element> element);
+
+private:
+    std::shared_ptr<SceneTree> mSceneTree;
     std::vector<std::shared_ptr<Element>> mElements;
+    std::vector<std::shared_ptr<Element>> mAddedElements;
+    std::unordered_map<int32_t, std::shared_ptr<Element>> mAddedElementMap;
+    std::unordered_map<int32_t, std::shared_ptr<Element>> mChangedElements;
+
     std::shared_ptr<Canvas> mCanvas;
     std::shared_ptr<CanvasRenderingContextSkia> mContext;
 };

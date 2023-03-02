@@ -78,6 +78,7 @@ export class InfiniteEngine {
     }
 
     private _requestRenderFrame() {
+        let startTime = +new Date();
         InfiniteLoader.module.GL.makeContextCurrent(this._glContextHandle);
         let frameUpdated = this._nativeEngine ? this._nativeEngine.requestRenderFrame() : false;
         if (frameUpdated && this._nativeEngine && this._screenCanvas) {
@@ -85,6 +86,8 @@ export class InfiniteEngine {
             var pixels = new Uint8ClampedArray(InfiniteLoader.module.HEAPU8.buffer, pixelsPtr, this._userCanvas!.width * this._userCanvas!.height * 4);
             var imageData = new ImageData(pixels, this._userCanvas!.width, this._userCanvas!.height);
             this._screenCanvas.getContext('2d')?.putImageData(imageData, 0, 0);
+            let endTime = +new Date();
+            console.log("元素数量：" + this.elementCount + " 耗时：" + (endTime - startTime) + "ms")
         }
         requestAnimationFrame(this._requestRenderFrame.bind(this));
     }

@@ -6,17 +6,39 @@
 #define INFINITEENGINE_ELEMENT_HPP
 
 #include "CanvasRenderingContextSkia.hpp"
+#include "RTree.h"
+#include <functional>
 
-class Element {
+struct ElementStatus {
+    bool isInScene = false;
+};
+
+class Element:public std::enable_shared_from_this<Element> {
 public:
+    typedef std::function<void(std::shared_ptr<Element>)> StatusObserver;
+
     Element(int32_t id);
 
     virtual ~Element();
 
-    virtual bool requestRender(std::shared_ptr<CanvasRenderingContextSkia> context);
+    int32_t getID() {return mID;}
+
+    void registerStatusObserver(StatusObserver observer);
+
+    virtual void requestRender(std::shared_ptr<CanvasRenderingContextSkia> context);
+
+    virtual void bindSceneTree(std::shared_ptr<SceneTree> sceneTree) { mSceneTree = sceneTree;}
 
 protected:
-    int32_t mId;
+    void invokeStatusObserver();
+
+protected:
+    std::shared_ptr<SceneTree> mSceneTree;
+    int32_t mID;
+private:
+    StatusObserver mStatusObserver;
 };
+
+
 
 #endif  // INFINITEENGINE_ELEMENT_HPP

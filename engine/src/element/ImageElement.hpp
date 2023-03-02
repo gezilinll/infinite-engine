@@ -8,11 +8,21 @@
 #include "Element.hpp"
 #include "include/core/SkImage.h"
 
+struct ImageElementStatus : public ElementStatus {
+    bool isInScene = false;
+    SkRect rectInScene;
+    SkRect lastDstRect;
+    SkRect srcRect;
+    SkRect dstRect;
+};
+
 class ImageElement : public Element {
 public:
     ImageElement(int32_t id);
 
     ~ImageElement();
+
+    void bindSceneTree(std::shared_ptr<SceneTree> sceneTree) override;
 
     void setSource(sk_sp<SkImage> image);
 
@@ -20,12 +30,13 @@ public:
 
     void setDstRect(SkScalar x, SkScalar y, SkScalar width, SkScalar height);
 
-    bool requestRender(std::shared_ptr<CanvasRenderingContextSkia> context);
+    void requestRender(std::shared_ptr<CanvasRenderingContextSkia> context) override;
 
 private:
-    SkRect mSrcRect;
-    SkRect mDstRect;
-    bool mHasRendered;
+    void updateSceneInfo(bool removed);
+
+private:
+    ImageElementStatus mStatus;
     sk_sp<SkImage> mImageData;
 };
 
