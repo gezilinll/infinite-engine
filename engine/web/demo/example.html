@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" style="width: 100%; height: 100%;">
+<html lang="en">
+
     <head>
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,11 +8,14 @@
         <title>Infinite Engine Example</title>
     </head>
 
-    <body style="width: 100%; height: 100%;">
-        <div style="margin-top:10px;">
-            <canvas id="isurface" width="1080" height="1080"></canvas>
-            <script type="module" src="./example.js"></script>
+    <body>
+        <div>
+            <button id="addImage">添加图片</button>
+            <button id="drawScene">场景线绘制已开启</button>
         </div>
+        <canvas id="isurface" width="1000" height="1000" style="border: 1px
+            solid black; width: 500px;"></canvas>
+        <script type="module" src="./example.js"></script>
     </body>
 
 </html>

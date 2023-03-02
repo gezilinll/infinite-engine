@@ -32,8 +32,13 @@ void InfiniteEngine::addElement(std::shared_ptr<Element> element) {
         std::bind(&InfiniteEngine::onElementStatusChanged, this, std::placeholders::_1));
 }
 
+bool InfiniteEngine::ifEngineStatusChanged() {
+    return mLastStatus.sceneLineEnabled != mCurrentStatus.sceneLineEnabled;
+}
+
 bool InfiniteEngine::requestRenderFrame() {
-    bool frameUpdated = !(mChangedElements.empty() && mAddedElements.empty());
+    bool frameUpdated
+        = !(mChangedElements.empty() && mAddedElements.empty() && !ifEngineStatusChanged());
     if (frameUpdated) {
         if (!mChangedElements.empty()) {
             // TODO
@@ -42,10 +47,18 @@ bool InfiniteEngine::requestRenderFrame() {
                 element->requestRender(mContext);
             }
         }
+        if (mCurrentStatus.sceneLineEnabled) {
+            auto rects = mSceneTree->ListTree();
+            for (auto rect : rects) {
+                mContext->strokeRect(rect.m_min[0], rect.m_min[1], rect.m_max[0] - rect.m_min[0],
+                                     rect.m_max[1] - rect.m_min[1]);
+            }
+        }
         mContext->flush();
         std::unordered_map<int32_t, std::shared_ptr<Element>>().swap(mChangedElements);
         std::unordered_map<int32_t, std::shared_ptr<Element>>().swap(mAddedElementMap);
         std::vector<std::shared_ptr<Element>>().swap(mAddedElements);
+        mLastStatus = mCurrentStatus;
     }
     return frameUpdated;
 }

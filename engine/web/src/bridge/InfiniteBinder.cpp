@@ -50,9 +50,12 @@ EMSCRIPTEN_BINDINGS(InfiniteBinding) {
         .function("requestRenderFrame", optional_override([](InfiniteEngine& self) -> bool {
                       return self.requestRenderFrame();
                   }))
-        .function("readPixels", optional_override([](InfiniteEngine& self) -> long {
-                      return self.readPixels();
-                  }));
+        .function("readPixels",
+                  optional_override([](InfiniteEngine& self) -> long { return self.readPixels(); }))
+        .function("enableDrawScene",
+                  optional_override([](InfiniteEngine& self) -> void { self.enableDrawScene(); }))
+        .function("disableDrawScene",
+                  optional_override([](InfiniteEngine& self) -> void { self.disableDrawScene(); }));
 
     class_<Element>("Element").smart_ptr<std::shared_ptr<Element>>("std::shared_ptr<Element>");
 

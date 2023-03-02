@@ -8735,9 +8735,11 @@ var asmLibraryArg = {
   "invoke_v": invoke_v,
   "invoke_vi": invoke_vi,
   "invoke_vif": invoke_vif,
+  "invoke_viffff": invoke_viffff,
   "invoke_vii": invoke_vii,
   "invoke_viiffffffff": invoke_viiffffffff,
   "invoke_viii": invoke_viii,
+  "invoke_viiif": invoke_viiif,
   "invoke_viiii": invoke_viiii,
   "invoke_viiiii": invoke_viiiii,
   "invoke_viiiiii": invoke_viiiiii,
@@ -9041,6 +9043,17 @@ function invoke_viiiiii(index,a1,a2,a3,a4,a5,a6) {
   }
 }
 
+function invoke_viffff(index,a1,a2,a3,a4,a5) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1,a2,a3,a4,a5);
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
+
 function invoke_viiffffffff(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) {
   var sp = stackSave();
   try {
@@ -9089,6 +9102,17 @@ function invoke_iif(index,a1,a2) {
   var sp = stackSave();
   try {
     return getWasmTableEntry(index)(a1,a2);
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_viiif(index,a1,a2,a3,a4) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1,a2,a3,a4);
   } catch(e) {
     stackRestore(sp);
     if (e !== e+0) throw e;

@@ -12,6 +12,10 @@
 #include "Models.hpp"
 #include "RTree.h"
 
+struct EngineStatus {
+    bool sceneLineEnabled = false;
+};
+
 class InfiniteEngine {
 public:
     InfiniteEngine(int width, int height);
@@ -26,8 +30,14 @@ public:
 
     long readPixels() { return mContext->readPixels(); };
 
+    void enableDrawScene() { mCurrentStatus.sceneLineEnabled = true; }
+
+    void disableDrawScene() { mCurrentStatus.sceneLineEnabled = false; }
+
 private:
     void onElementStatusChanged(std::shared_ptr<Element> element);
+
+    bool ifEngineStatusChanged();
 
 private:
     std::shared_ptr<SceneTree> mSceneTree;
@@ -38,6 +48,8 @@ private:
 
     std::shared_ptr<Canvas> mCanvas;
     std::shared_ptr<CanvasRenderingContextSkia> mContext;
+    EngineStatus mLastStatus;
+    EngineStatus mCurrentStatus;
 };
 
 #endif  // ENGINE_INFINITEENGINE_HPP

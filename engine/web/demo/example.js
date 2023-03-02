@@ -19,7 +19,19 @@ InfiniteLoader.init().then(async () => {
     const ctxBitmap = canvasBitmapElement.getContext('bitmaprenderer');
     ctxBitmap.transferFromImageBitmap(imageBitmap);
 
-    function addRandomElement() {
+    let drawSceneEnabled = true;
+    engine.enableDrawScene();
+    document.getElementById("drawScene").onclick = async function () {
+        drawSceneEnabled = !drawSceneEnabled;
+        if (drawSceneEnabled) {
+            document.getElementById("drawScene").textContent = "场景线绘制已开启";
+            engine.enableDrawScene();
+        } else {
+            document.getElementById("drawScene").textContent = "场景线绘制已关闭";
+            engine.disableDrawScene();
+        }
+    }
+    document.getElementById("addImage").onclick = async function () {
         let sx = Math.random() * 100;
         let sy = Math.random() * 50;
         let sw = Math.random() * 100;
@@ -33,7 +45,5 @@ InfiniteLoader.init().then(async () => {
         imageElement.setSrcRect(sx, sy, sw, sh);
         imageElement.setDstRect(dx, dy, dw, dh);
         engine.addElement(imageElement);
-        requestAnimationFrame(addRandomElement);
     }
-    requestAnimationFrame(addRandomElement);
 });

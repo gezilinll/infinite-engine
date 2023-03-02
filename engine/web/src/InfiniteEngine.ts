@@ -52,6 +52,14 @@ export class InfiniteEngine {
         }
     }
 
+    enableDrawScene() {
+        this._nativeEngine?.enableDrawScene();
+    }
+
+    disableDrawScene() {
+        this._nativeEngine?.disableDrawScene();
+    }
+
     private _getWebGLContext(canvas: HTMLCanvasElement | OffscreenCanvas): WebGLContextHandle {
         var contextAttributes = {
             'alpha': 1,
