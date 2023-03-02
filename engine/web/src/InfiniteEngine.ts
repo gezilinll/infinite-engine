@@ -1,5 +1,6 @@
 import { Element } from "./element/Element";
 import { ElementRBush } from './base/ElementRBush'
+import { Rect } from "./base/Rect";
 export class InfiniteEngine {
     private _userCanvas: HTMLCanvasElement | null = null;
     private _context: CanvasRenderingContext2D | null;
@@ -37,7 +38,9 @@ export class InfiniteEngine {
 
     addElement(element: Element) {
         element.bindSceneTree(this._sceneTree);
+        element.registerStatusObserver(this._onElementStatusChanged.bind(this))
         this._addedElements.push(element);
+        this._addedElementsMap.set(element.ID, element);
         this._elements.push(element);
     }
 
@@ -65,15 +68,55 @@ export class InfiniteEngine {
 
     }
 
+    private _onElementStatusChanged(element: Element) {
+        if (this._addedElementsMap.get(element.ID)) {
+            return;
+        }
+        this._changedElementsMap.set(element.ID, element);
+    }
+
     private _requestRenderFrame() {
         let frameUpdated
             = !(this._changedElementsMap.size == 0 && this._addedElements.length == 0);
         if (frameUpdated) {
             let startTime = +new Date();
+            if (this._changedElementsMap.size > 0) {
+                let rectsToClear: Array<Rect> = new Array();
+                let rectsToDraw: Array<Rect> = new Array();
+                for (let element of this._changedElementsMap) {
+                    rectsToClear.push(element[1].rectToClear);
+                    rectsToDraw.push(element[1].rectToDraw);
+                }
+                for (let rect of rectsToClear) {
+                    this._context!.clearRect(rect.left, rect.top, rect.width, rect.height);
+                    let hitElements = this._sceneTree.search({
+                        minX: rect.left,
+                        minY: rect.top,
+                        maxX: rect.right,
+                        maxY: rect.bottom
+                    });
+                    for (let element of hitElements) {
+                        element.requestRenderDirty(this._context!, rect);
+                    }
+                }
+                for (let rect of rectsToDraw) {
+                    this._context!.clearRect(rect.left, rect.top, rect.width, rect.height);
+                    let hitElements = this._sceneTree.search({
+                        minX: rect.left,
+                        minY: rect.top,
+                        maxX: rect.right,
+                        maxY: rect.bottom
+                    });
+                    for (let element of hitElements) {
+                        element.requestRenderDirty(this._context!, rect);
+                    }
+                }
+            }
             for (let element of this._addedElements) {
                 element.requestRender(this._context!);
             }
             this._addedElements = [];
+            this._addedElementsMap.clear();
             this._changedElementsMap.clear();
             let endTime = +new Date();
             console.log("元素数量：" + this._elements.length + " 耗时：" + (endTime - startTime) + "ms")
