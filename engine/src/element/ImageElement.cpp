@@ -87,11 +87,18 @@ void ImageElement::requestRenderDirty(std::shared_ptr<CanvasRenderingContextSkia
         dr = std::min(mStatus.dstRect.right(), dirtyRect.right());
         db = std::min(mStatus.dstRect.bottom(), dirtyRect.bottom());
         float wScale = mStatus.srcRect.width() / mStatus.dstRect.width();
-        sx = mStatus.srcRect.x() + ((dl - mStatus.dstRect.x()) / wScale);
+        sx = mStatus.srcRect.x() + ((dl - mStatus.dstRect.x()) * wScale);
         sw = (dr - dl) * wScale;
         float hScale = mStatus.srcRect.height() / mStatus.dstRect.height();
-        sy = ((dt - mStatus.dstRect.y()) / wScale) + mStatus.srcRect.y();
+        sy = ((dt - mStatus.dstRect.y()) * hScale) + mStatus.srcRect.y();
         sh = std::min((db - dt) * hScale, static_cast<float>(mImageData->height()));
+        printf("------------ requestRenderDirty %d ------------ \n", mID);
+        printf(
+            "dl:%f dt:%f dr:%f db:%f sx:%f sy:%f sw:%f sh:%f src.x:%f "
+            "src.y:%f, src.w:%f src.h:%f dst.l:%f dst.t:%f dst.r:%f dst.b:%f\n",
+            dl, dt, dr, db, sx, sy, sw, sh, mStatus.srcRect.x(), mStatus.srcRect.y(),
+            mStatus.srcRect.width(), mStatus.srcRect.height(), mStatus.dstRect.left(),
+            mStatus.dstRect.top(), mStatus.dstRect.right(), mStatus.dstRect.bottom());
         context->drawImage(mImageData, sx, sy, sw, sh, dl, dt, dr - dl, db - dt);
         mStatus.lastDstRect = mStatus.dstRect;
     }

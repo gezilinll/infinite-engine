@@ -56,7 +56,7 @@ InfiniteLoader.init().then(async () => {
         let sh = canvasBitmapElement.height;
         let dx = getRandomInt(engine.width / 2);
         let dy = getRandomInt(engine.height / 2);
-        let dw = getRandomInt(engine.width / 5);
+        let dw = Math.min(sw, getRandomInt(engine.width / 3) + 200);
         let dh = dw / (sw / sh);
         let imageElement = new ImageElement(engine.elementsLength);
         imageElement.setSource(canvasBitmapElement);
@@ -68,10 +68,11 @@ InfiniteLoader.init().then(async () => {
     document.getElementById("moveImageAnimation").onclick = async function () {
         let elementLength = engine.elementsLength;
         let elementID = getRandomInt(elementLength);
+        console.log("move element:" + elementID)
         let element = engine.getElementByID(elementID);
         let dx = getRandomInt(engine.width / 2);
         let dy = getRandomInt(engine.height / 2);
-        let dw = getRandomInt(engine.width / 5);
+        let dw = Math.min(element.sourceWidth, getRandomInt(engine.width / 3) + 200);
         let dh = dw / (element.sourceWidth / element.sourceHeight);
         element.setDstRect(dx, dy, dw, dh);
     }

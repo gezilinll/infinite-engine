@@ -36,7 +36,9 @@ public:
 
     void requestRender(std::shared_ptr<CanvasRenderingContextSkia> context) override;
 
-    void requestRenderDirty(std::shared_ptr<CanvasRenderingContextSkia> context, const SkRect &dirtyRect) override;
+    void requestRenderDirty(std::shared_ptr<CanvasRenderingContextSkia> context,
+                            const SkRect& dirtyRect) override;
+
 private:
     void updateSceneInfo(bool removed);
 

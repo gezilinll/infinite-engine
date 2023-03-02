@@ -3,6 +3,8 @@
 //
 
 #include "InfiniteEngine.hpp"
+#include <chrono>
+#include <ctime>
 
 InfiniteEngine::InfiniteEngine(int width, int height) {
     mCanvas = std::make_shared<Canvas>(width, height);
@@ -40,14 +42,27 @@ bool InfiniteEngine::requestRenderFrame() {
     bool frameUpdated
         = !(mChangedElements.empty() && mAddedElements.empty() && !ifEngineStatusChanged());
     if (frameUpdated) {
+        // auto start = std::chrono::steady_clock::now();
+        // long long cost = std::chrono::duration_cast<std::chrono::milliseconds>(
+        //                      std::chrono::steady_clock::now() - start)
+        //                      .count();
+        // printf("costTime1:%lld\n", cost);
         if (!mChangedElements.empty()) {
             std::vector<SkRect> rectsToClear;
             std::vector<SkRect> rectsToDraw;
             for (auto element : mChangedElements) {
-                rectsToClear.push_back(element.second->getRectToClear());
-                rectsToDraw.push_back(element.second->getRectToDraw());
+                auto clearRect = element.second->getRectToClear();
+                rectsToClear.push_back(
+                    SkRect::MakeXYWH(std::floor(clearRect.x()), std::floor(clearRect.y()),
+                                     std::ceil(clearRect.width()), std::ceil(clearRect.height())));
+                auto drawRect = element.second->getRectToDraw();
+                rectsToDraw.push_back(
+                    SkRect::MakeXYWH(std::floor(drawRect.x()), std::floor(drawRect.y()),
+                                     std::ceil(drawRect.width()), std::ceil(drawRect.height())));
             }
             for (auto& rect : rectsToClear) {
+                printf("rectsToClear %f %f %f %f\n", rect.left(), rect.top(), rect.right(),
+                       rect.bottom());
                 mContext->clearRect(rect.x(), rect.y(), rect.width(), rect.height());
                 float min[2] = {rect.x(), rect.y()};
                 float max[2] = {rect.x() + rect.width(), rect.y() + rect.height()};
@@ -56,6 +71,7 @@ bool InfiniteEngine::requestRenderFrame() {
                     elementsToDraw.insert(std::make_pair(id, 1));
                     return true;
                 });
+
                 for (auto element : mElements) {
                     if (elementsToDraw.find(element->getID()) != elementsToDraw.end()
                         && element->getRectToDraw().intersect(rect)) {
@@ -64,6 +80,8 @@ bool InfiniteEngine::requestRenderFrame() {
                 }
             }
             for (auto& rect : rectsToDraw) {
+                printf("rectsToDraw %f %f %f %f\n", rect.left(), rect.top(), rect.right(),
+                       rect.bottom());
                 mContext->clearRect(rect.x(), rect.y(), rect.width(), rect.height());
                 std::unordered_map<uint32_t, uint8_t> elementsToDraw;
                 float min[2] = {rect.x(), rect.y()};
