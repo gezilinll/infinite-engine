@@ -1,6 +1,7 @@
 import { InfiniteEngine } from "../src/InfiniteEngine";
 import { ImageElement } from "../src/element/ImageElement";
 import { Rect } from "../src/base/Rect";
+import { Debuger } from "../src/Debuger";
 
 async function downloadImage(path) {
     const response = await fetch(path);
@@ -17,6 +18,8 @@ async function downloadImage(path) {
 
 }
 
+document.getElementById('message').textContent = "等待下载图片完成..."
+
 const bitmapMap = new Map();
 bitmapMap.set("0", await downloadImage("http://rqm1nmwwk.hn-bkt.clouddn.com/5.jpg"));
 bitmapMap.set("1", await downloadImage("http://rqm1nmwwk.hn-bkt.clouddn.com/26.jpg"));
@@ -24,7 +27,12 @@ bitmapMap.set("2", await downloadImage("http://rqm1nmwwk.hn-bkt.clouddn.com/35.j
 bitmapMap.set("3", await downloadImage("http://rqm1nmwwk.hn-bkt.clouddn.com/62.jpg"));
 bitmapMap.set("4", await downloadImage("http://rqm1nmwwk.hn-bkt.clouddn.com/71.jpg"));
 
+document.getElementById('message').textContent = "可正常使用"
+
 let engine = new InfiniteEngine("isurface");
+let debuger = new Debuger();
+debuger.messageOutput = "message";
+engine.debuger = debuger;
 
 // let drawSceneEnabled = true;
 // engine.enableDrawScene();
@@ -43,7 +51,7 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
 
-document.getElementById("addImage").onclick = async function () {
+function addImage() {
     let imageIndex = getRandomInt(5);
     let canvasBitmapElement = bitmapMap.get("" + imageIndex);
     let sx = 0;
@@ -61,29 +69,32 @@ document.getElementById("addImage").onclick = async function () {
     engine.addElement(imageElement);
 }
 
-// let canvasBitmapElement = await downloadImage("http://rqm1nmwwk.hn-bkt.clouddn.com/76.jpg");
-// let sx = 0;
-// let sy = 0;
-// let sw = canvasBitmapElement.width;
-// let sh = canvasBitmapElement.height;
-// let dx = 0;
-// let dy = 0;
-// let dw = engine.width;
-// let dh = engine.height;
-// let imageElement = new ImageElement(engine.elementsLength);
-// imageElement.source = canvasBitmapElement;
-// imageElement.srcRect = Rect.MakeXYWH(sx, sy, sw, sh);
-// imageElement.dstRect = Rect.MakeXYWH(dx, dy, dw, dh);
-// engine.addElement(imageElement);
-
-document.getElementById("moveImageAnimation").onclick = async function () {
+function moveImage() {
     let elementLength = engine.elementsLength;
     let elementID = getRandomInt(elementLength);
-    console.log("move element:" + elementID)
     let element = engine.getElementByID(elementID);
     let dx = getRandomInt(engine.width / 2);
     let dy = getRandomInt(engine.height / 2);
     let dw = Math.min(element.sourceWidth, getRandomInt(engine.width / 3) + 200);
     let dh = dw / (element.sourceWidth / element.sourceHeight);
     element.dstRect = Rect.MakeXYWH(dx, dy, dw, dh);
+}
+
+function startMadMode() {
+    addImage();
+    moveImage();
+    requestAnimationFrame(startMadMode);
+}
+
+document.getElementById("addImage").onclick = async function () {
+    addImage();
+
+}
+
+document.getElementById("moveImage").onclick = async function () {
+    moveImage();
+}
+
+document.getElementById("madMode").onclick = async function () {
+    startMadMode();
 }

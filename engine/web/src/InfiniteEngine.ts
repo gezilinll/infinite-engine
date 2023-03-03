@@ -1,16 +1,21 @@
 import { Element } from "./element/Element";
 import { ElementRBush } from './base/ElementRBush'
 import { Rect } from "./base/Rect";
+import { Debuger, DebugFrame } from "./Debuger";
+
 export class InfiniteEngine {
     private _userCanvas: HTMLCanvasElement | null = null;
     private _context: CanvasRenderingContext2D | null;
     private _width: number;
     private _height: number;
+
+    private _sceneTree = new ElementRBush();
     private _elements: Array<Element> = new Array();
     private _addedElements: Array<Element> = new Array();
     private _addedElementsMap: Map<number, Element> = new Map();
     private _changedElementsMap: Map<number, Element> = new Map();
-    private _sceneTree = new ElementRBush();
+
+    private _debuger?: Debuger;
 
     constructor(idOrElement: HTMLCanvasElement | string) {
         var isHTMLCanvas = typeof HTMLCanvasElement !== 'undefined' && idOrElement instanceof HTMLCanvasElement;
@@ -60,12 +65,8 @@ export class InfiniteEngine {
         return this._height;
     }
 
-    enableDrawScene() {
-
-    }
-
-    disableDrawScene() {
-
+    set debuger(obj: Debuger) {
+        this._debuger = obj;
     }
 
     private _onElementStatusChanged(element: Element) {
@@ -79,7 +80,13 @@ export class InfiniteEngine {
         let frameUpdated
             = !(this._changedElementsMap.size == 0 && this._addedElements.length == 0);
         if (frameUpdated) {
-            let startTime = +new Date();
+            this._debuger?.onRenderStart();
+            let debugFrame = new DebugFrame();
+            debugFrame.totalElementCount = this._elements.length;
+            debugFrame.newElementCount = this._addedElements.length;
+            debugFrame.changedElementCount = this._changedElementsMap.size;
+            debugFrame.sceneTree = this._sceneTree;
+
             if (this._changedElementsMap.size > 0) {
                 let rectsToClear: Array<Rect> = new Array();
                 let rectsToDraw: Array<Rect> = new Array();
@@ -95,6 +102,7 @@ export class InfiniteEngine {
                         maxX: rect.right,
                         maxY: rect.bottom
                     });
+                    debugFrame.updatedElementCount += hitElements.length;
                     for (let element of hitElements) {
                         element.requestRenderDirty(this._context!, rect);
                     }
@@ -107,6 +115,7 @@ export class InfiniteEngine {
                         maxX: rect.right,
                         maxY: rect.bottom
                     });
+                    debugFrame.updatedElementCount += hitElements.length;
                     for (let element of hitElements) {
                         element.requestRenderDirty(this._context!, rect);
                     }
@@ -118,8 +127,7 @@ export class InfiniteEngine {
             this._addedElements = [];
             this._addedElementsMap.clear();
             this._changedElementsMap.clear();
-            let endTime = +new Date();
-            console.log("元素数量：" + this._elements.length + " 耗时：" + (endTime - startTime) + "ms")
+            this._debuger?.onRenderEnd(debugFrame);
         }
         requestAnimationFrame(this._requestRenderFrame.bind(this));
     }

@@ -9,13 +9,17 @@
     </head>
 
     <body>
-        <div>
-            <button id="addImage">添加图片</button>
-            <button id="moveImageAnimation">移动图片动画</button>
-            <button id="drawScene">场景线绘制已开启</button>
+        <div style="margin-bottom: 3px;">
+            <p id="message">状态提示</p>
         </div>
-        <canvas id="isurface" width="1000" height="1000" style="border: 1px
-            solid black; width: 500px;"></canvas>
+        <div style="margin-bottom: 6px;">
+            <button id="addImage">添加图片</button>
+            <button id="moveImage">移动图片</button>
+            <button id="drawScene">场景线绘制已开启</button>
+            <button id="madMode">疯狂模式</button>
+        </div>
+        <canvas id="isurface" width="1000" height="720" style="border: 1px
+            solid black;"></canvas>
         <script type="module" src="./example.js"></script>
     </body>
 
