@@ -11,6 +11,7 @@ export class DebugFrame {
 
 export class Debuger {
     private _drawSceneEnabled: boolean = false;
+    private _debugMode: boolean = false;
     private _baseCanvas: HTMLCanvasElement | null = null;
     private _debugCanvas: HTMLCanvasElement | null = null;
     private _messageOutput?: string;
@@ -20,8 +21,11 @@ export class Debuger {
         this._baseCanvas = canvas;
     }
 
+    set debugMode(enabled: boolean) {
+        this._debugMode = enabled;
+    }
+
     set messageOutput(elementID: string) {
-        console.log(elementID);
         this._messageOutput = elementID;
     }
 
@@ -30,7 +34,9 @@ export class Debuger {
     }
 
     onRenderStart() {
-        this._startTime = +new Date();
+        if (this._messageOutput || this._debugMode) {
+            this._startTime = +new Date();
+        }
     }
 
     onRenderEnd(frame: DebugFrame) {
@@ -42,15 +48,18 @@ export class Debuger {
         //         this.baseCanvas.parentNode!.appendChild(this._debugCanvas);
         //     }
         // }
-        console.log(this._messageOutput);
-        if (this._messageOutput) {
+        if (this._messageOutput || this._debugMode) {
             let endTime = +new Date();
             let message = "元素总量：" + frame.totalElementCount
                 + " 新增元素：" + frame.newElementCount
                 + " 变更元素：" + frame.changedElementCount
                 + " 联动更新元素：" + frame.updatedElementCount
                 + " 渲染耗时：" + (endTime - this._startTime) + "ms";
-            document.getElementById(this._messageOutput)!.textContent = message;
+            if (this._messageOutput) {
+                document.getElementById(this._messageOutput)!.textContent = message;
+            } else {
+                console.log(message);
+            }
         }
     }
 }
